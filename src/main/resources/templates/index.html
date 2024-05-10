@@ -4,12 +4,38 @@
     <meta charset="UTF-8">
     <title>Home</title>
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.6.2/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" href="/css/index.css"/>
 </head>
 <body>
 
-<div class="container">
-    <p class="h1">Home Page</p>
+<header th:insert="~{common/navbar :: navbar}"></header>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 d-flex align-items-center">
+            <div>
+                <h2>Welcome to Connect'IN</h2>
+                <p>A new way to connect, to share and to explore. Meet new people. Discover new interests. Connect to <strong>everyone</strong> and <strong>everything</strong>.</p>
+                <div class="d-flex justify-content-center">
+                    <button class="btn btn-outline-dark btn-lg mt-5">Sign Up Now</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <img th:src="@{/images/homepage_image.png}" class="img-fluid" alt="Image">
+        </div>
+    </div>
 </div>
+
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+<div class="blob blob3"></div>
+<div class="blob blob4"></div>
+
+<div class="blob-smaller" style="top: 10%; left: 5%; background-color: #0c5cef;"></div>
+<div class="blob-smaller" style="top: 60%; left: 20%; background-color: #ca30ff;"></div>
+<div class="blob-smaller" style="bottom: 30%; right: 5%; background-color: #0c5cef;"></div>
+<div class="blob-smaller" style="bottom: 20%; left: 15%; background-color: #ffcc00;"></div>
 
 <script th:src="@{/webjars/jquery/3.5.1/jquery.min.js}"></script>
 <script th:src="@{/webjars/bootstrap/4.6.2/js/bootstrap.bundle.min.js}"></script>
