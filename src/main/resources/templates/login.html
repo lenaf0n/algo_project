@@ -25,6 +25,7 @@
         <div class="form-group">
             <label for="password" class="required">Password:</label>
             <input type="password" class="form-control" id="password" th:field="*{password}" required>
+            <small class="text-danger" th:text="${error}"></small>
         </div>
         <button type="submit" class="btn btn-outline-primary">Login</button>
         <br>

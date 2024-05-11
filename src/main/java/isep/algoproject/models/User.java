@@ -22,10 +22,6 @@ public class User implements Serializable {
     @Column(nullable = false)
     public String password;
 
-    @Lob
-    @Column(columnDefinition = "MEDIUMBLOB")
-    private String image;
-
     private String bio;
 
     public long getId() {
@@ -66,14 +62,6 @@ public class User implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
     }
 
     public String getBio() {

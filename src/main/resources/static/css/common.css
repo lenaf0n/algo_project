@@ -1,0 +1,10 @@
+header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+footer {
+    background-color: #f8f9fa;
+    margin-top: auto;
+}
