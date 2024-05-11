@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.6.2/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" href="/css/login-signup.css"/>
+</head>
+<body>
+
+<div class="container" style="max-width: 600px">
+    <div class="row justify-content-center">
+        <div class="col-auto">
+            <a href="/" th:href="@{/}">
+                <img th:src="@{/images/logo.png}" alt="Home" class="img-fluid"  style="max-width: 75px">
+            </a>
+        </div>
+    </div>
+    <h1>Sign Up</h1>
+    <form th:action="@{/signup}" th:object="${user}" method="post">
+        <input type="hidden" th:field="*{id}">
+        <div class="form-group">
+            <label for="username" class="required">Username:</label>
+            <input type="text" class="form-control" id="username" th:field="*{username}" required>
+            <small class="text-danger" id="usernameError" th:text="${usernameError}"></small>
+        </div>
+        <div class="form-group">
+            <label for="name" class="required">Name:</label>
+            <input type="text" class="form-control" id="name" th:field="*{name}" required>
+        </div>
+        <div class="form-group">
+            <label for="email" class="required">Email:</label>
+            <input type="email" class="form-control" id="email" th:field="*{email}" required>
+            <small class="text-danger" id="emailError" th:text="${emailError}"></small>
+        </div>
+        <div class="form-group">
+            <label for="password" class="required">Password:</label>
+            <input type="password" class="form-control" id="password" th:field="*{password}" required>
+        </div>
+        <div class="form-group">
+            <label for="bio">Bio:</label>
+            <textarea class="form-control" id="bio" th:field="*{bio}"></textarea>
+        </div>
+        <button type="submit" class="btn btn-outline-primary">Submit</button>
+        <br>
+        <a th:href="@{/login}" class="text-black-50">Already have an account ?</a>
+    </form>
+</div>
+
+</body>
+</html>
