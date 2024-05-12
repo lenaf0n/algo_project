@@ -30,10 +30,10 @@ public class HomeController {
 
     @PostMapping("/login")
     public String loginSubmit(@Valid User user, HttpSession session, Model model) {
-        boolean isAuthenticated = userService.authenticate(user.getUsername(), user.getPassword());
+        User authenticatedUser = userService.authenticate(user.getUsername(), user.getPassword());
 
-        if (isAuthenticated) {
-            session.setAttribute("user", user);
+        if (authenticatedUser != null) {
+            session.setAttribute("user", authenticatedUser);
             return "redirect:/dashboard";
         } else {
             model.addAttribute("error", "Invalid username or password");
@@ -59,7 +59,7 @@ public class HomeController {
             model.addAttribute("emailError", "Email is already taken!");
         }
         if (isUsernameUnique && isEmailUnique) {
-            userService.save(user);
+            userService.saveNewUser(user);
             return "redirect:/login";
         }
         else {
