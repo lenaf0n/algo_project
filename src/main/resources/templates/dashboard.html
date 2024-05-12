@@ -5,6 +5,7 @@
     <title>Dashboard</title>
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.6.2/css/bootstrap.min.css}"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <link rel="stylesheet" href="/css/common.css"/>
     <link rel="stylesheet" href="/css/bottom-nav.css"/>
     <link rel="stylesheet" href="/css/dashboard.css"/>
@@ -12,13 +13,15 @@
 <body>
 <header th:insert="~{common/navbar :: navbar}"></header>
 
+<svg width="100%" height="800" id="graph-container"></svg>
+
 <nav class="navbar navbar-expand navbar-bottom">
     <ul class="navbar-nav mx-auto">
         <li class="nav-item">
             <a class="nav-link" th:href="@{/}">Home<i class="bi-house pl-1"></i></a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" th:href="@{/search}">Search<i class="bi-search pl-1"></i></a>
+            <a class="nav-link" id="searchLink" data-toggle="modal" data-target="#searchModal" href="#">Search<i class="bi-search pl-1"></i></a>
         </li>
         <li class="nav-item">
             <a class="nav-link" th:href="@{/messages}">Chat<i class="bi bi-chat pl-1"></i></a>
@@ -34,5 +37,137 @@
         </li>
     </ul>
 </nav>
+
+<!-- Modal search-->
+<div class="modal fade" id="searchModal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="searchModalLabel">Search</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control" id="searchInput" placeholder="Search by username">
+                <ul id="userList" class="list-group mt-2">
+                    <!-- User list items will be populated here -->
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/webjars/bootstrap/4.6.2/js/bootstrap.min.js"></script>
+<script src="/js/dashboard.js"></script>
+<script>
+    // Sample data representing nodes (users) and edges (connections)
+    const data = {
+        nodes: [
+            { id: 'sessionUser', name: 'Session User' },
+            { id: 'user1', name: 'User 1' },
+            { id: 'user2', name: 'User 2' },
+            // Add more nodes as needed
+        ],
+        links: [
+            { source: 'sessionUser', target: 'user1' },
+            { source: 'sessionUser', target: 'user2' },
+            // Add more links as needed
+        ]
+    };
+
+    const svg = d3.select('#graph-container');
+
+    // Set up simulation with center force
+    const simulation = d3.forceSimulation(data.nodes)
+        .force('link', d3.forceLink(data.links).id(d => d.id).distance(100))
+        .force('charge', d3.forceManyBody().strength(-100))
+
+    // Function to update graph size and position on window resize
+    function updateGraphSize() {
+        // Get the width and height of the window
+        const screenWidth = window.innerWidth;
+
+        // Update the SVG container size
+        svg.attr('width', screenWidth);
+
+        // Update the center force of the simulation
+        simulation.force('center', d3.forceCenter(screenWidth * 0.5, 300));
+    }
+
+    // Attach resize event listener to the window
+    window.addEventListener('resize', updateGraphSize);
+
+    // Call the updateGraphSize function initially to set initial size and position
+    updateGraphSize();
+
+    // Create links
+    const links = svg.selectAll('line')
+        .data(data.links)
+        .enter().append('line')
+        .attr('stroke', '#999') // Set color of the lines
+        .attr('stroke-width', 2); // Set width of the lines
+
+    // Create nodes
+    const nodes = svg.selectAll('circle')
+        .data(data.nodes)
+        .enter().append('circle')
+        .attr('r', 10)
+        .attr('fill', d => d.id === 'sessionUser' ? 'red' : 'steelblue') // Set color based on node id
+        .call(d3.drag()
+            .on('start', dragstarted)
+            .on('drag', dragged)
+            .on('end', dragended))
+        .on('click', handleNodeClick);
+
+    // Update positions of nodes and links
+    simulation.on('tick', () => {
+        links.attr('x1', d => d.source.x)
+            .attr('y1', d => d.source.y)
+            .attr('x2', d => d.target.x)
+            .attr('y2', d => d.target.y);
+
+        nodes.attr('cx', d => d.x)
+            .attr('cy', d => d.y);
+
+        labels.attr('x', d => d.x)
+            .attr('y', d => d.y);
+    });
+
+    // Add node labels
+    const labels = svg.selectAll('text')
+        .data(data.nodes)
+        .enter().append('text')
+        .text(d => d.name)
+        .attr('dx', 12)
+        .attr('dy', 4);
+
+
+    // Drag handlers
+    function dragstarted(event, d) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+    }
+
+    function dragged(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
+    }
+
+    function dragended(event, d) {
+        if (!event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+    }
+
+    function handleNodeClick(event, d) {
+        // Implement actions to be executed when a node is clicked
+        console.log('Node clicked:', d);
+        // For example, you can open a modal, navigate to a different page, or perform any other action
+        // Here, we're just logging the clicked node's data to the console
+    }
+</script>
 </body>
 </html>
