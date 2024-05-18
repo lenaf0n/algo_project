@@ -6,3 +6,7 @@ body {
     background-position: 0 0, 20px 20px;
     background-size: 40px 40px;
 }
+
+.has-notifications {
+    color: red;
+}
