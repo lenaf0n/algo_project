@@ -2,7 +2,7 @@ package isep.algoproject.models;
 
 public class SearchResultUser {
     private User user;
-    private boolean isFriend;
+    private String status;
 
     public User getUser() {
         return user;
@@ -12,11 +12,11 @@ public class SearchResultUser {
         this.user = user;
     }
 
-    public boolean isFriend() {
-        return isFriend;
+    public String getStatus() {
+        return status;
     }
 
-    public void setFriend(boolean friend) {
-        isFriend = friend;
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

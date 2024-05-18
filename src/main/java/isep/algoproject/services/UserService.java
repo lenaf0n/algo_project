@@ -1,8 +1,7 @@
 package isep.algoproject.services;
 
-import isep.algoproject.models.Connection;
-import isep.algoproject.models.SearchResultUser;
-import isep.algoproject.models.User;
+import isep.algoproject.models.*;
+import isep.algoproject.models.enums.NodeType;
 import isep.algoproject.models.enums.Status;
 import isep.algoproject.repositories.ConnectionRepository;
 import isep.algoproject.repositories.UserRepository;
@@ -11,7 +10,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -38,26 +40,6 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void saveNewConnection(User sessionUser, long userId) {
-        Connection connection = new Connection();
-        connection.setUser1(sessionUser);
-        connection.setUser2(userRepository.findById(userId));
-        connection.setStatus(Status.FRIEND);
-
-        connectionRepository.save(connection);
-    }
-
-    public void deleteConnection(User sessionUser, long userId) {
-        Connection connection1 = connectionRepository.findByUser1IdAndUser2Id(sessionUser.getId(), userId);
-        Connection connection2 = connectionRepository.findByUser1IdAndUser2Id(sessionUser.getId(), userId);
-
-        if (connection1 != null) {
-            connectionRepository.delete(connection1);
-        } else if (connection2 != null) {
-            connectionRepository.delete(connection2);
-        }
-    }
-
     public User authenticate(String username, String password) {
         User user = userRepository.findByUsername(username);
         if (passwordEncoder.matches(password, user.getPassword())) {
@@ -65,6 +47,32 @@ public class UserService {
         }
         return null;
     }
+
+    public Graph getUserGraph(User user) {
+        List<Connection> userConnections = connectionRepository.findByUser1OrUser2AndFriend(user);
+        List<User> users = getDistinctUsersFromConnections(userConnections);
+
+        List<User> usersToAdd = new ArrayList<>();
+        List<Connection> connectionsForUsers = connectionRepository.findByUser1InOrUser2InAndStatus(users, users, Status.FRIEND);
+        for (Connection connection : connectionsForUsers) {
+            User user1 = connection.getUser1();
+            User user2 = connection.getUser2();
+
+            if (!users.contains(user1) && !usersToAdd.contains(user1)) {
+                usersToAdd.add(user1);
+            }
+            if (!users.contains(user2) && !usersToAdd.contains(user2)) {
+                usersToAdd.add(user2);
+            }
+        }
+
+        userConnections.addAll(connectionsForUsers);
+        users.addAll(usersToAdd);
+        Set<Connection> userConnectionsSet = new HashSet<>(userConnections);
+
+        return createGraph(users, new ArrayList<>(userConnectionsSet));
+    }
+
 
     public List<SearchResultUser> getUsersByUsername(String username, User user) {
         List<SearchResultUser> searchResultUsers = new ArrayList<>();
@@ -76,7 +84,7 @@ public class UserService {
                 searchResultUser.setUser(foundUser);
 
                 Status status = getConnectionStatus(user, foundUser);
-                searchResultUser.setFriend(status == Status.FRIEND);
+                searchResultUser.setStatus(status.toString());
 
                 searchResultUsers.add(searchResultUser);
             }
@@ -99,4 +107,26 @@ public class UserService {
         }
     }
 
+    private static List<User> getDistinctUsersFromConnections(List<Connection> connections) {
+        Set<User> distinctUsers = new HashSet<>();
+
+        for (Connection connection : connections) {
+            distinctUsers.add(connection.getUser1());
+            distinctUsers.add(connection.getUser2());
+        }
+
+        return new ArrayList<>(distinctUsers);
+    }
+
+    private Graph createGraph(List<User> users, List<Connection> connections) {
+        List<Node> userNodes = users.stream()
+                .map(user -> new Node(user.getId().toString(), user.getName(), NodeType.USER))
+                .collect(Collectors.toList());
+
+        List<Link> userLinks = connections.stream()
+                .map(connection -> new Link(connection.getUser1().getId().toString(), connection.getUser2().getId().toString()))
+                .collect(Collectors.toList());
+
+        return new Graph(userNodes, userLinks);
+    }
 }

@@ -8,7 +8,6 @@ $(document).ready(function () {
                 success: function (data) {
                     $('#userList').empty();
                     if (data.length <= 10) {
-                        console.log(data);
                         data.forEach(function (searchResultUser) {
                             let listItem = $('<li>').addClass('list-group-item d-flex justify-content-between align-items-center');
                             let nameUsernameContainer = $('<div>').addClass('col');
@@ -17,8 +16,10 @@ $(document).ready(function () {
                             nameUsernameContainer.append(name, username);
                             let heartButton = $('<button>').addClass('btn btn-sm');
 
-                            if (searchResultUser.friend) {
+                            if (searchResultUser.status === 'FRIEND') {
                                 heartButton.addClass('btn-danger').html('<i class="bi bi-heart-fill"></i>');
+                            } else if (searchResultUser.status === 'PENDING') {
+                                heartButton.addClass('btn-warning').attr('disabled', true).html('<i class="bi bi-heart"></i>');
                             } else {
                                 heartButton.addClass('btn-outline-danger').html('<i class="bi bi-heart"></i>');
                             }
@@ -45,13 +46,13 @@ $(document).ready(function () {
     });
 
     function filledHeartFunction(userId) {
-        console.log('filled')
         $.ajax({
             type: 'DELETE',
             url: '/unlike/' + userId,
             success: function (response) {
-                closePopup();
+                closeSearchPopup();
                 alert(response);
+                location.reload();
             },
             error: function (xhr, status, error) {
                 console.error(error);
@@ -60,13 +61,13 @@ $(document).ready(function () {
     }
 
     function outlineHeartFunction(userId) {
-        console.log('outline')
         $.ajax({
             type: 'POST',
             url: '/like/' + userId,
             success: function (response) {
-                closePopup();
+                closeSearchPopup();
                 alert(response);
+                location.reload();
             },
             error: function (xhr, status, error) {
                 console.error(error);
@@ -80,6 +81,64 @@ $(document).ready(function () {
     });
 });
 
-function closePopup() {
+function closeSearchPopup() {
     $('#searchModal').modal('hide');
 }
+
+function fetchNotifications() {
+    $.ajax({
+        url: '/user/notifications',
+        method: 'GET',
+        success: function(response) {
+            if (response.length > 0) {
+                updateNotificationsLink(true);
+                $('#connectionList').empty();
+                response.forEach(function (connection) {
+                    let listItem = $('<li>').addClass('list-group-item d-flex justify-content-between align-items-center');
+                    let nameUsernameContainer = $('<div>').addClass('col');
+                    let name = $('<strong>').text(connection.name).addClass('pl-1');
+                    let username = $('<span>').addClass('text-muted').text('@' + connection.username);
+                    nameUsernameContainer.append(name, username);
+                    let acceptButton = $('<button>').addClass('btn btn-sm').text('Accept connection');
+
+                    acceptButton.click(function () {
+                        accpetConnection(connection.id);
+                    });
+                    listItem.append(nameUsernameContainer, acceptButton);
+                    $('#connectionList').append(listItem);
+                });
+            } else {
+                updateNotificationsLink(false);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error fetching notifications:', error);
+        }
+    });
+}
+
+function updateNotificationsLink(hasNotifications) {
+    const notificationsLink = document.getElementById('notificationsLink');
+    if (hasNotifications) {
+        notificationsLink.classList.add('text-danger');
+    } else {
+        notificationsLink.classList.remove('text-danger');
+    }
+}
+
+function accpetConnection(userId) {
+    $.ajax({
+        type: 'POST',
+        url: '/accept-connection/' + userId,
+        success: function (response) {
+            alert(response);
+            location.reload();
+        },
+        error: function (xhr, status, error) {
+            console.error(error);
+        }
+    });
+}
+
+fetchNotifications();
+setInterval(fetchNotifications, 60000);

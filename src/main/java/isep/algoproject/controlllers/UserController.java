@@ -1,7 +1,9 @@
 package isep.algoproject.controlllers;
 
+import isep.algoproject.models.Graph;
 import isep.algoproject.models.SearchResultUser;
 import isep.algoproject.models.User;
+import isep.algoproject.services.ConnectionService;
 import isep.algoproject.services.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,8 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private ConnectionService connectionService;
 
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session) {
@@ -52,7 +56,7 @@ public class UserController {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new RedirectView("/login"));
         }
-        userService.saveNewConnection(user, userId);
+        connectionService.saveNewConnection(user, userId);
         return ResponseEntity.ok("Connection request sent successful");
     }
 
@@ -62,8 +66,36 @@ public class UserController {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new RedirectView("/login"));
         }
-        userService.deleteConnection(user, userId);
+        connectionService.deleteConnection(user, userId);
         return ResponseEntity.ok("Connection request deleted successful");
+    }
+
+    @GetMapping("/user/graph")
+    public ResponseEntity<?> getUserGraph(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new RedirectView("/login"));
+        }
+        return ResponseEntity.ok(userService.getUserGraph(user));
+    }
+
+    @GetMapping("/user/notifications")
+    public ResponseEntity<?> getUserNotifications(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new RedirectView("/login"));
+        }
+        return ResponseEntity.ok(connectionService.getPendingConnections(user));
+    }
+
+    @PostMapping("/accept-connection/{userId}")
+    public ResponseEntity<?> acceptConnection(HttpSession session, @PathVariable long userId) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new RedirectView("/login"));
+        }
+        connectionService.acceptConnection(user, userId);
+        return ResponseEntity.ok("Connection accepted");
     }
 
     private boolean checkLogin(HttpSession session) {
