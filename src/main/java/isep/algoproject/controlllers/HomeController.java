@@ -33,7 +33,9 @@ public class HomeController {
         boolean isAuthenticated = userService.authenticate(user.getUsername(), user.getPassword());
 
         if (isAuthenticated) {
-            session.setAttribute("user", user);
+            User userSession = userService.findByUsername(user.getUsername());
+            System.out.println(userSession.getId() +" : " + userSession.getUsername());
+            session.setAttribute("user", userSession);
             return "redirect:/dashboard";
         } else {
             model.addAttribute("error", "Invalid username or password");

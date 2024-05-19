@@ -15,6 +15,10 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    public User findById(long id){return userRepository.findById(id);}
+
+    public User findByUsername(String username){return userRepository.findByUsername(username);}
+
     public boolean isUsernameUnique(String username) {
         return !userRepository.existsByUsername(username);
     }
@@ -29,7 +33,7 @@ public class UserService {
     }
 
     public boolean authenticate(String username, String password) {
-        User user = userRepository.findByUsername(username);
+        User user = findByUsername(username);
         return user != null && passwordEncoder.matches(password, user.getPassword());
     }
 }
