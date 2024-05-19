@@ -21,10 +21,9 @@ async function fetchData() {
         let data = await fetchData();
         console.log(data);
 
-        // Set up simulation with center force
         simulation = d3.forceSimulation(data.nodes)
             .force('link', d3.forceLink(data.links).id(d => d.id).distance(function(d) {
-                return Math.random() * (200 - 100) + 100;
+                return Math.random() * (300 - 100) + 100;
             }))
             .force('charge', d3.forceManyBody().strength(-100))
 
@@ -41,7 +40,7 @@ async function fetchData() {
             .data(data.nodes)
             .enter().append('circle')
             .attr('r', 10)
-            .attr('fill', d => (d.name === userNameValue) ? 'red' : 'steelblue')
+            .attr('fill', d => (d.name === userNameValue) ? 'red' : (d.type === 'USER') ? 'steelblue' : 'rgb(250, 218, 94)')
             .call(d3.drag()
                 .on('start', dragstarted)
                 .on('drag', dragged)
@@ -81,26 +80,38 @@ function updateGraphSize(simulation) {
 }
 
 // Drag handlers
+// Drag handlers
 function dragstarted(event, d) {
     if (!event.active) simulation.alphaTarget(0.3).restart();
-    d.fx = d.x;
-    d.fy = d.y;
+    if (d.name === userNameValue) {
+        // For the red node, fix its position
+        d.fx = d.x;
+        d.fy = d.y;
+    }
 }
 
 function dragged(event, d) {
-    d.fx = event.x;
-    d.fy = event.y;
+    if (d.name !== userNameValue) {
+        // Allow dragging only for nodes other than the red node
+        d.fx = event.x;
+        d.fy = event.y;
+    }
 }
 
 function dragended(event, d) {
     if (!event.active) simulation.alphaTarget(0);
+    // Release the fixed position after dragging ends
     d.fx = null;
     d.fy = null;
 }
 
+
 function handleNodeClick(event, d) {
-    // Implement actions to be executed when a node is clicked
     console.log('Node clicked:', d);
-    // For example, you can open a modal, navigate to a different page, or perform any other action
-    // Here, we're just logging the clicked node's data to the console
+
+    if (d.type === 'INTEREST') {
+        let cleanedStr = d.id.replace('interest', '');
+        console.log(cleanedStr)
+        window.location.href = `/interest-page/${cleanedStr}`
+    }
 }

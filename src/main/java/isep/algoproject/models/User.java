@@ -3,6 +3,8 @@ package isep.algoproject.models;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class User implements Serializable {
@@ -23,6 +25,9 @@ public class User implements Serializable {
     public String password;
 
     private String bio;
+
+    @ManyToMany(mappedBy = "likedByUsers")
+    private List<Interest> likedInterests = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -70,5 +75,13 @@ public class User implements Serializable {
 
     public void setBio(String bio) {
         this.bio = bio;
+    }
+
+    public List<Interest> getLikedInterests() {
+        return likedInterests;
+    }
+
+    public void setLikedInterests(List<Interest> likedInterests) {
+        this.likedInterests = likedInterests;
     }
 }

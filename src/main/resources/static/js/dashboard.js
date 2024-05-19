@@ -1,7 +1,7 @@
 $(document).ready(function () {
     $('#searchInput').on('input', function () {
         let username = $(this).val();
-        if (username.trim() !== '') {
+        if (username.trim() !== '' && !username.startsWith('#')) {
             $.ajax({
                 type: 'GET',
                 url: '/search/' + username,
@@ -37,10 +37,54 @@ $(document).ready(function () {
                     }
                 },
                 error: function (xhr, status, error) {
-                    console.error(error);
+                    console.error('Error:', error);
+                    console.log('Response Text:', xhr.responseText); // Log response text
                 }
             });
-        } else {
+        } else if (username.replace(/^#/, "").trim() !== '' && username.startsWith('#')) {
+            $.ajax({
+                type: 'GET',
+                url: '/interest/' + username.replace(/^#/, ""),
+                success: function (data) {
+                    $('#userList').empty();
+                    console.log(data)
+                    if (data.length <= 10) {
+                        data.forEach(function (searchResultInterest) {
+                            let listItem = $('<li>').addClass('list-group-item d-flex justify-content-between align-items-center');
+                            let nameContainer = $('<div>').addClass('col');
+                            let name = $('<strong>').text('Interest : ' + searchResultInterest.interest.name).addClass('pl-1');
+                            nameContainer.append(name);
+                            let heartButton = $('<button>').addClass('btn btn-sm');
+
+                            if (searchResultInterest.liked) {
+                                heartButton.addClass('btn-danger').html('<i class="bi bi-heart-fill"></i>');
+                            } else {
+                                heartButton.addClass('btn-outline-danger').html('<i class="bi bi-heart"></i>');
+                            }
+
+                            nameContainer.click(function () {
+                                window.location.href = `/interest-page/${searchResultInterest.interest.id}`
+                            })
+
+                            heartButton.click(function () {
+                                if ($(this).hasClass('btn-danger')) {
+                                    removeInterest(searchResultInterest.interest.id);
+                                } else {
+                                    addInterest(searchResultInterest.interest.id);
+                                }
+                            });
+                            listItem.append(nameContainer, heartButton);
+                            $('#userList').append(listItem);
+                        });
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                    console.log('Response Text:', xhr.responseText); // Log response text
+                }
+            });
+        }
+        else {
             $('#userList').empty();
         }
     });
@@ -64,6 +108,36 @@ $(document).ready(function () {
         $.ajax({
             type: 'POST',
             url: '/like/' + userId,
+            success: function (response) {
+                closeSearchPopup();
+                alert(response);
+                location.reload();
+            },
+            error: function (xhr, status, error) {
+                console.error(error);
+            }
+        });
+    }
+
+    function removeInterest(interestId) {
+        $.ajax({
+            type: 'DELETE',
+            url: '/interest/remove/' + interestId,
+            success: function (response) {
+                closeSearchPopup();
+                alert(response);
+                location.reload();
+            },
+            error: function (xhr, status, error) {
+                console.error(error);
+            }
+        });
+    }
+
+    function addInterest(interestId) {
+        $.ajax({
+            type: 'POST',
+            url: '/interest/like/' + interestId,
             success: function (response) {
                 closeSearchPopup();
                 alert(response);
@@ -111,7 +185,7 @@ function fetchNotifications() {
                 updateNotificationsLink(false);
             }
         },
-        error: function(xhr, status, error) {
+        error: function(error) {
             console.error('Error fetching notifications:', error);
         }
     });
