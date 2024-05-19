@@ -4,6 +4,7 @@ import isep.algoproject.models.*;
 import isep.algoproject.models.enums.NodeType;
 import isep.algoproject.models.enums.Status;
 import isep.algoproject.repositories.ConnectionRepository;
+import isep.algoproject.repositories.InterestRepository;
 import isep.algoproject.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,6 +28,9 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private InterestRepository interestRepository;
+    
     public User findById(long id){return userRepository.findById(id);}
 
     public User findByUsername(String username){return userRepository.findByUsername(username);}
@@ -74,7 +78,9 @@ public class UserService {
         users.addAll(usersToAdd);
         Set<Connection> userConnectionsSet = new HashSet<>(userConnections);
 
-        return createGraph(users, new ArrayList<>(userConnectionsSet));
+        List<Interest> userInterests = interestRepository.findInterestByLikedByUsersIn(users);
+
+        return createGraph(users, new ArrayList<>(userConnectionsSet), userInterests);
     }
 
 
@@ -122,15 +128,26 @@ public class UserService {
         return new ArrayList<>(distinctUsers);
     }
 
-    private Graph createGraph(List<User> users, List<Connection> connections) {
-        List<Node> userNodes = users.stream()
+    private Graph createGraph(List<User> users, List<Connection> connections, List<Interest> userInterests) {
+        List<Node> nodes = users.stream()
                 .map(user -> new Node(user.getId().toString(), user.getName(), NodeType.USER))
                 .collect(Collectors.toList());
 
-        List<Link> userLinks = connections.stream()
+        List<Link> links = connections.stream()
                 .map(connection -> new Link(connection.getUser1().getId().toString(), connection.getUser2().getId().toString()))
                 .collect(Collectors.toList());
 
-        return new Graph(userNodes, userLinks);
+        nodes.addAll(userInterests.stream()
+                .map(interest -> new Node(interest.getId().toString()+"interest", interest.getName(), NodeType.INTEREST))
+                .collect(Collectors.toList()));
+
+        for (User user : users) {
+            for (Interest interest : user.getLikedInterests()) {
+                Link link = new Link(user.getId().toString(), interest.getId().toString()+"interest");
+                links.add(link);
+            }
+        }
+
+        return new Graph(nodes, links);
     }
 }

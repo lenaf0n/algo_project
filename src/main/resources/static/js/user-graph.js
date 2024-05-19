@@ -21,10 +21,9 @@ async function fetchData() {
         let data = await fetchData();
         console.log(data);
 
-        // Set up simulation with center force
         simulation = d3.forceSimulation(data.nodes)
             .force('link', d3.forceLink(data.links).id(d => d.id).distance(function(d) {
-                return Math.random() * (200 - 100) + 100;
+                return Math.random() * (300 - 100) + 100;
             }))
             .force('charge', d3.forceManyBody().strength(-100))
 
@@ -41,7 +40,7 @@ async function fetchData() {
             .data(data.nodes)
             .enter().append('circle')
             .attr('r', 10)
-            .attr('fill', d => (d.name === userNameValue) ? 'red' : 'steelblue')
+            .attr('fill', d => (d.name === userNameValue) ? 'red' : (d.type === 'USER') ? 'steelblue' : 'rgb(250, 218, 94)')
             .call(d3.drag()
                 .on('start', dragstarted)
                 .on('drag', dragged)
@@ -68,6 +67,17 @@ async function fetchData() {
             .attr('dx', 12)
             .attr('dy', 4);
 
+        nodes.on('mouseover', function(event, d) {
+            d3.select(this)
+                .attr('r', 12);
+            svg.style('cursor', 'pointer');
+        })
+            .on('mouseout', function(event, d) {
+                d3.select(this)
+                    .attr('r', 10);
+                svg.style('cursor', 'default');
+            });
+
 
     } catch (error) {
         console.error('Error:', error);
@@ -77,19 +87,23 @@ async function fetchData() {
 function updateGraphSize(simulation) {
     const screenWidth = window.innerWidth;
     svg.attr('width', screenWidth);
-    simulation.force('center', d3.forceCenter(screenWidth * 0.5, 300));
+    simulation.force('center', d3.forceCenter(screenWidth * 0.5, 350));
 }
 
-// Drag handlers
 function dragstarted(event, d) {
     if (!event.active) simulation.alphaTarget(0.3).restart();
-    d.fx = d.x;
-    d.fy = d.y;
+    if (d.name === userNameValue) {
+        // For the red node, fix its position
+        d.fx = d.x;
+        d.fy = d.y;
+    }
 }
 
 function dragged(event, d) {
-    d.fx = event.x;
-    d.fy = event.y;
+    if (d.name !== userNameValue) {
+        d.fx = event.x;
+        d.fy = event.y;
+    }
 }
 
 function dragended(event, d) {
@@ -98,9 +112,13 @@ function dragended(event, d) {
     d.fy = null;
 }
 
+
 function handleNodeClick(event, d) {
-    // Implement actions to be executed when a node is clicked
     console.log('Node clicked:', d);
-    // For example, you can open a modal, navigate to a different page, or perform any other action
-    // Here, we're just logging the clicked node's data to the console
+
+    if (d.type === 'INTEREST') {
+        let cleanedStr = d.id.replace('interest', '');
+        console.log(cleanedStr)
+        window.location.href = `/interest-page/${cleanedStr}`
+    }
 }

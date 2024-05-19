@@ -30,7 +30,7 @@ public class ConnectionService {
 
     public void deleteConnection(User sessionUser, long userId) {
         Connection connection1 = connectionRepository.findByUser1IdAndUser2Id(sessionUser.getId(), userId);
-        Connection connection2 = connectionRepository.findByUser1IdAndUser2Id(sessionUser.getId(), userId);
+        Connection connection2 = connectionRepository.findByUser1IdAndUser2Id(userId, sessionUser.getId());
 
         if (connection1 != null) {
             connectionRepository.delete(connection1);
