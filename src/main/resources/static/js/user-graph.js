@@ -67,6 +67,17 @@ async function fetchData() {
             .attr('dx', 12)
             .attr('dy', 4);
 
+        nodes.on('mouseover', function(event, d) {
+            d3.select(this)
+                .attr('r', 12);
+            svg.style('cursor', 'pointer');
+        })
+            .on('mouseout', function(event, d) {
+                d3.select(this)
+                    .attr('r', 10);
+                svg.style('cursor', 'default');
+            });
+
 
     } catch (error) {
         console.error('Error:', error);
@@ -76,11 +87,9 @@ async function fetchData() {
 function updateGraphSize(simulation) {
     const screenWidth = window.innerWidth;
     svg.attr('width', screenWidth);
-    simulation.force('center', d3.forceCenter(screenWidth * 0.5, 300));
+    simulation.force('center', d3.forceCenter(screenWidth * 0.5, 350));
 }
 
-// Drag handlers
-// Drag handlers
 function dragstarted(event, d) {
     if (!event.active) simulation.alphaTarget(0.3).restart();
     if (d.name === userNameValue) {
@@ -92,7 +101,6 @@ function dragstarted(event, d) {
 
 function dragged(event, d) {
     if (d.name !== userNameValue) {
-        // Allow dragging only for nodes other than the red node
         d.fx = event.x;
         d.fy = event.y;
     }
@@ -100,7 +108,6 @@ function dragged(event, d) {
 
 function dragended(event, d) {
     if (!event.active) simulation.alphaTarget(0);
-    // Release the fixed position after dragging ends
     d.fx = null;
     d.fy = null;
 }
