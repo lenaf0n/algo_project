@@ -27,6 +27,10 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    public User findById(long id){return userRepository.findById(id);}
+
+    public User findByUsername(String username){return userRepository.findByUsername(username);}
+
     public boolean isUsernameUnique(String username) {
         return !userRepository.existsByUsername(username);
     }

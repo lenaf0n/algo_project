@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Message</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.6.2/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" href="/css/index.css"/>
+    <link rel="stylesheet" href="/css/common.css"/>
+</head>
+<body>
+    <div class="container-fluid row vh-100 clearfix">
+        <div class="col-sm-4 d-flex flex-column bg-white" id="groupPart">
+            <div>
+                <h1>Global Message</h1>
+            </div>
+        </div>
+        <div class="col-sm-8 d-flex flex-column float-right" id="chatPart">
+            <div class="container-fluid row mb-5" th:each="message : ${messageUserMap.keySet()}">
+                <div class="media border p-3 bg-white col-sm-12" th:if="${messageUserMap.get(message).getId() == session.user.id}">
+                    <div class="media-body">
+                        <h4 th:text="${messageUserMap.get(message).getUsername()}"> <small th:text="${message.getCreatedAt()}"></smallth:text></small></h4>
+                        <p th:text="${message.getContent()}"></p>
+                    </div>
+                    <img th:src="@{/images/logo.png}" alt="John Doe" class="ml-3 mt-3 rounded-circle" style="width : 60px;">
+                </div>
+                <div class="media border p-3 bg-white col-sm-12" th:unless="${messageUserMap.get(message).getId() == session.user.id}">
+                    <img th:src="@{/images/logo.png}" alt="John Doe" class="ml-3 mt-3 rounded-circle" style="width : 60px;">
+                    <div class="media-body">
+                        <h4 th:text="${messageUserMap.get(message).getUsername()}"> <small th:text="${message.getCreatedAt()}"></smallth:text></small></h4>
+                        <p th:text="${message.getContent()}"></p>
+                    </div>
+
+                </div>
+            </div>
+            <div class="container-fluid fixed-bottom d-flex flex-inline">
+                <div class="col-sm-4 invisible"><p>1</p></div>
+                <form class="col-sm-8 bg-success" action="#" th:action="@{/message/postNewMessage}" th:object="${newMessage}" method="POST">
+                    <div class="row align-middle">
+                        <input type="text" placeholder="Message ..." class="form-control col-sm-8 m-1" th:field="*{content}">
+                        <input type="file" id="image-input" name="file" accept="image/*" class="form-control col-sm-2 m-1" th:field="*{image}">
+                        <button type="submit" class="btn btn-light btn-outline-success col-sm-1 m-1"> > </button>
+                    </div>
+
+                </form>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>
