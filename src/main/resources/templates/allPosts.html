@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>All posts</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/common.css"/>
+</head>
+<body>
+
+<header th:insert="~{common/navbar :: navbar}"></header>
+
+<div class="col-md-8">
+    <div class="col-md-8" th:each="postIsLiked : ${posts}">
+        <div class="card mb-4">
+            <img class="card-img-top" th:src="'data:image/png;base64,' + ${postIsLiked.getPost().getImage()}" alt="Post Image">
+            <div class="card-body">
+                <div class="row justify-content-around">
+                    <p class="card-text">
+                        <button class="btn btn-sm btn-outline-secondary comments-btn" th:data-postId="${postIsLiked.getPost().getId()}">
+                            Comments
+                        </button>
+                        <small class="text-muted" th:text="${postIsLiked.getPost().getComments().size()} + ' comments'"></small>
+                    </p>
+                    <p class="card-text">
+                        <button class="btn btn-sm btn-outline-primary like-btn" th:data-postid="${postIsLiked.getPost().getId()}" th:data-liked="${postIsLiked.isLiked()}" onclick="toggleComments('${postIsLiked.getPost().getId()}')">
+                            <span class="like-text" th:text="${postIsLiked.isLiked() ? 'Unlike' : 'Like'}"></span>
+                        </button>
+                        <small class="text-muted" th:text="${postIsLiked.getPost().getLikes().size()} + ' likes'"
+                               th:classappend="${postIsLiked.isLiked() ? 'liked' : ''}">
+                        </small>
+                    </p>
+                </div>
+                <p class="card-text" th:utext="'<strong>@' + ${postIsLiked.getPost().getUser().getUsername()} + '</strong> : ' + ${postIsLiked.getPost().getContent()}"></p>
+                <p class="card-text"><small class="text-muted" th:text="${postIsLiked.getPost().getCreatedAt()}"></small></p>
+            </div>
+        </div>
+    </div>
+    <div th:if="${totalPages > 1}">
+        <ul class="pagination">
+            <li class="page-item" th:class="${currentPage == 0 ? 'disabled' : ''}">
+                <a class="page-link" th:href="@{/post/all(page=0)}">First</a>
+            </li>
+            <li class="page-item" th:class="${currentPage == 0 ? 'disabled' : ''}">
+                <a class="page-link" th:href="@{/post/all(page=${currentPage - 1})}">Previous</a>
+            </li>
+            <li class="page-item" th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}">
+                <a class="page-link" th:href="@{/post/all(page=${pageNumber})}" th:text="${pageNumber + 1}"></a>
+            </li>
+            <li class="page-item" th:class="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+                <a class="page-link" th:href="@{/post/all(page=${currentPage + 1})}">Next</a>
+            </li>
+            <li class="page-item" th:class="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+                <a class="page-link" th:href="@{/post/all(page=${totalPages - 1})}">Last</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+
+</body>
+</html>

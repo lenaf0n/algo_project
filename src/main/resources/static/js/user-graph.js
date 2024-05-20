@@ -121,4 +121,8 @@ function handleNodeClick(event, d) {
         console.log(cleanedStr)
         window.location.href = `/interest-page/${cleanedStr}`
     }
+    else if (d.type === 'USER' && d.name !== userNameValue) {
+        const userId = d.id;
+        window.location.href = `/user-page/${userId}`
+    }
 }

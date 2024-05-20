@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.6.2/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" href="/css/common.css"/>
+    <style>
+        .custom-link {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .custom-link:hover {
+            text-decoration: underline;
+            text-decoration-color: #ca30ff;
+        }
+
+        .custom-link.selected {
+            color: #ca30ff;
+            text-decoration: #ca30ff;
+        }
+    </style>
+</head>
+<body>
+<header th:insert="~{common/navbar :: navbar}"></header>
+
+<div class="container text-center mt-4" th:data-userId="${user.getId()}" id="userDiv">
+    <h1 th:text="${user.getUsername()} + ' Page'"></h1>
+</div>
+
+<div class="container text-center mt-3 pb-2 border-bottom" id="linkContainer">
+    <div class="row justify-content-center">
+        <div class="col-auto">
+            <a href="#" class="custom-link selected" id="postsLink">Posts</a>
+        </div>
+        <div class="col-auto">
+            <a href="#" class="custom-link">Interests</a>
+        </div>
+        <div class="col-auto" th:if="${likedUser == 'FRIEND'}">
+            <a href="#" class="custom-link" id="removeFriend">Remove friend</a>
+        </div>
+        <div class="col-auto" th:if="${likedUser == 'PENDING'}">
+            <a href="#" class="custom-link" id="removePending">Remove friend (Pending Request)</a>
+        </div>
+        <div class="col-auto" th:if="${likedUser == 'NONE'}">
+            <a href="#" class="custom-link" id="likeFriend">Like friend</a>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4" id="content">
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/webjars/bootstrap/4.6.2/js/bootstrap.min.js"></script>
+<script src="/js/user.js"></script>
+</body>
+</html>

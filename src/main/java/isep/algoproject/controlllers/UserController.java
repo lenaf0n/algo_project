@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -101,5 +102,29 @@ public class UserController {
     private boolean checkLogin(HttpSession session) {
         User user = (User) session.getAttribute("user");
         return user != null;
+    }
+
+    @GetMapping("/profile")
+    public String profile(HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/login";
+        }
+        model.addAttribute("user", user);
+        return "profile";
+    }
+
+    @GetMapping("/user-page/{userId}")
+    public String userPage(@PathVariable long userId, Model model, HttpSession session) {
+        User sessionUser = (User) session.getAttribute("user");
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+
+        User user = userService.findById(userId);
+        String likedUser = connectionService.isUserLikedBySessionUser(user, sessionUser);
+        model.addAttribute("user", user);
+        model.addAttribute("likedUser", likedUser);
+        return "user";
     }
 }

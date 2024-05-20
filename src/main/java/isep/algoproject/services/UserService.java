@@ -150,4 +150,16 @@ public class UserService {
 
         return new Graph(nodes, links);
     }
+
+    public List<PostIsLiked> getLikedPostsByUser(User user) {
+        List<PostIsLiked> likedPosts = new ArrayList<>();
+        List<Post> posts = userRepository.findPostsByUserId(user.getId());
+        for (Post post : posts) {
+            PostIsLiked likedPost = new PostIsLiked();
+            likedPost.setPost(post);
+            likedPost.setLiked(true);
+            likedPosts.add(likedPost);
+        }
+        return likedPosts;
+    }
 }
