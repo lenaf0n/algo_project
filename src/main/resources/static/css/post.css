@@ -1,0 +1,24 @@
+#sticky-sidebar {
+    position: fixed;
+    top: 150px;
+    right: 5%;
+    width: 30%;
+    z-index: 1000;
+    background: linear-gradient(45deg, #0c5cef, #ca30ff, #0c5cef, #ffcc00);
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    height: 80vh;
+    padding-left: 30px;
+    padding-right: 30px;
+    overflow-y: auto;
+}
+
+.comment{
+    background-color: white;
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.content{
+    background-color: white;
+}

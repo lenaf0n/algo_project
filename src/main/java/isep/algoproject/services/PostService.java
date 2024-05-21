@@ -1,12 +1,12 @@
 package isep.algoproject.services;
 
 import isep.algoproject.models.*;
+import isep.algoproject.models.Dtos.PostCommentDto;
+import isep.algoproject.models.Dtos.PostIsLiked;
 import isep.algoproject.repositories.PostCommentRepository;
 import isep.algoproject.repositories.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -95,18 +95,27 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
-    public void addComment(long postId, PostComment postComment, User user) {
+    public void addComment(long postId, String comment, User user) {
         Post post = postRepository.findPostById(postId);
 
+        PostComment postComment = new PostComment();
         postComment.setPost(post);
         postComment.setUser(user);
+        postComment.setContent(comment);
         postComment.setCreatedAt(Instant.now());
 
         postCommentRepository.save(postComment);
     }
 
     public Page<PostIsLiked> getAllPosts(Pageable pageable, User user) {
-        Page<Post> posts = postRepository.findAll(pageable);
+        Pageable sortedByCreatedAt = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        Page<Post> posts = postRepository.findAll(sortedByCreatedAt);
+
         List<PostIsLiked> postsIsLikedContent = new ArrayList<>();
         for (Post post : posts) {
             PostIsLiked postIsLiked = new PostIsLiked();

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>User</title>
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.6.2/css/bootstrap.min.css}"/>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <link rel="stylesheet" href="/css/common.css"/>
     <style>
         .custom-link {
@@ -20,6 +21,11 @@
             color: #ca30ff;
             text-decoration: #ca30ff;
         }
+
+        .graph-background {
+            background-color: #f0f0f0;
+            background-image: radial-gradient(#bbb 1px, transparent 1px), radial-gradient(#bbb 1px, transparent 1px);
+        }
     </style>
 </head>
 <body>
@@ -35,7 +41,7 @@
             <a href="#" class="custom-link selected" id="postsLink">Posts</a>
         </div>
         <div class="col-auto">
-            <a href="#" class="custom-link">Interests</a>
+            <a href="#" class="custom-link" id="graphLink">Interests</a>
         </div>
         <div class="col-auto" th:if="${likedUser == 'FRIEND'}">
             <a href="#" class="custom-link" id="removeFriend">Remove friend</a>
@@ -49,12 +55,13 @@
     </div>
 </div>
 
+<svg width="100%" height="600" id="graph-container" style="display: none"></svg>
 <div class="container mt-4" id="content">
-
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="/webjars/bootstrap/4.6.2/js/bootstrap.min.js"></script>
 <script src="/js/user.js"></script>
+<script src="/js/user-interest-graph.js"></script>
 </body>
 </html>

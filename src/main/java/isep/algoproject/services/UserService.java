@@ -1,10 +1,15 @@
 package isep.algoproject.services;
 
 import isep.algoproject.models.*;
+import isep.algoproject.models.Dtos.Graph;
+import isep.algoproject.models.Dtos.Link;
+import isep.algoproject.models.Dtos.Node;
+import isep.algoproject.models.Dtos.SearchResultUser;
 import isep.algoproject.models.enums.NodeType;
 import isep.algoproject.models.enums.Status;
 import isep.algoproject.repositories.ConnectionRepository;
 import isep.algoproject.repositories.InterestRepository;
+import isep.algoproject.repositories.PostRepository;
 import isep.algoproject.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,7 +35,9 @@ public class UserService {
 
     @Autowired
     private InterestRepository interestRepository;
-    
+    @Autowired
+    private PostRepository postRepository;
+
     public User findById(long id){return userRepository.findById(id);}
 
     public User findByUsername(String username){return userRepository.findByUsername(username);}
@@ -103,6 +110,27 @@ public class UserService {
         return searchResultUsers;
     }
 
+    public Graph getUserInterestGraph(long userId) {
+        User user = userRepository.findById(userId);
+
+        List<Interest> interests = user.getLikedInterests();
+
+        List<Node> nodes = new ArrayList<>();
+        List<Link> links = new ArrayList<>();
+
+        nodes.add(new Node(user.getId().toString(), user.getUsername(), NodeType.USER));
+        nodes.addAll(interests.stream()
+                .map(interest -> new Node(interest.getId().toString()+"interest", interest.getName(), NodeType.INTEREST))
+                .collect(Collectors.toList()));
+
+        for (Interest interest : interests) {
+            Link link = new Link(user.getId().toString(), interest.getId().toString()+"interest");
+            links.add(link);
+        }
+
+        return new Graph(nodes, links);
+    }
+
     private Status getConnectionStatus(User user1, User user2) {
         Connection connection1 = connectionRepository.findByUser1IdAndUser2Id(user1.getId(), user2.getId());
         Connection connection2 = connectionRepository.findByUser1IdAndUser2Id(user2.getId(), user1.getId());
@@ -149,17 +177,5 @@ public class UserService {
         }
 
         return new Graph(nodes, links);
-    }
-
-    public List<PostIsLiked> getLikedPostsByUser(User user) {
-        List<PostIsLiked> likedPosts = new ArrayList<>();
-        List<Post> posts = userRepository.findPostsByUserId(user.getId());
-        for (Post post : posts) {
-            PostIsLiked likedPost = new PostIsLiked();
-            likedPost.setPost(post);
-            likedPost.setLiked(true);
-            likedPosts.add(likedPost);
-        }
-        return likedPosts;
     }
 }

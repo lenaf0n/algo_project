@@ -1,6 +1,8 @@
 package isep.algoproject.controlllers;
 
 import isep.algoproject.models.*;
+import isep.algoproject.models.Dtos.PostCommentDto;
+import isep.algoproject.models.Dtos.PostIsLiked;
 import isep.algoproject.services.PostService;
 import isep.algoproject.services.UserService;
 import jakarta.servlet.http.HttpSession;
@@ -54,7 +56,7 @@ public class PostController {
 
         List<PostIsLiked> posts = postService.getUserPostsByUserId(userId, user);
         model.addAttribute("posts", posts);
-        model.addAttribute("postComment", new PostComment());
+
         return "userPosts";
     }
 
@@ -86,16 +88,16 @@ public class PostController {
         return ResponseEntity.ok(postComments);
     }
 
-    @PostMapping("/post/comment")
-    public String addComment(@Valid PostComment comment, HttpSession session) {
+    @PostMapping("/post/comment/{comment}")
+    public ResponseEntity<?> addComment(@PathVariable String comment, HttpSession session) {
         User user = (User) session.getAttribute("user");
         if (user == null) {
-            return "redirect:/login";
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new RedirectView("/login"));
         }
 
         long postId = (long) session.getAttribute("postId");
         postService.addComment(postId, comment, user);
-        return "redirect:/profile";
+        return ResponseEntity.ok("Comment added");
     }
 
     @GetMapping("/post/all")
@@ -114,17 +116,5 @@ public class PostController {
         model.addAttribute("totalPages", postPage.getTotalPages());
 
         return "allPosts";
-    }
-
-    @GetMapping("/post/liked")
-    public String showLikedPosts(Model model, HttpSession session) {
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            return "redirect:/login";
-        }
-        List<PostIsLiked> posts = userService.getLikedPostsByUser(user);
-        model.addAttribute("posts", posts);
-
-        return "likedPosts";
     }
 }

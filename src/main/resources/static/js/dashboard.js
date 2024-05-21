@@ -14,6 +14,11 @@ $(document).ready(function () {
                             let name = $('<strong>').text(searchResultUser.user.name).addClass('pl-1');
                             let username = $('<span>').addClass('text-muted').text('@' + searchResultUser.user.username);
                             nameUsernameContainer.append(name, username);
+
+                            nameUsernameContainer.click(function () {
+                                window.location.href = `/user-page/${searchResultUser.user.id}`;
+                            });
+
                             let heartButton = $('<button>').addClass('btn btn-sm');
 
                             if (searchResultUser.status === 'FRIEND') {
@@ -54,6 +59,11 @@ $(document).ready(function () {
                             let nameContainer = $('<div>').addClass('col');
                             let name = $('<strong>').text('Interest : ' + searchResultInterest.interest.name).addClass('pl-1');
                             nameContainer.append(name);
+
+                            nameContainer.click(function () {
+                                window.location.href = `/interest-page/${searchResultInterest.interest.id}`;
+                            });
+
                             let heartButton = $('<button>').addClass('btn btn-sm');
 
                             if (searchResultInterest.liked) {

@@ -12,6 +12,7 @@ $(document).ready(function(){
     // Function to load My Posts content
     function loadMyPostsContent() {
         const userId = $("#userDiv").attr("data-userId");
+        $('#content').css('display', 'block');
         console.log(userId);
         $.ajax({
             url: '/post/' + userId,
@@ -46,6 +47,8 @@ $(document).ready(function(){
     // Event listener for clicking Posts link
     $('#postsLink').click(function(event){
         event.preventDefault();
+        $('#content').removeClass('graph-background');
+        $('#graph-container').css('display', 'none');
         loadMyPostsContent(); // Use the function to load "My Posts" content
     });
 
@@ -58,6 +61,12 @@ $(document).ready(function(){
     $('#removePending').click(function(event){
         event.preventDefault();
         removeRequest();
+    });
+
+    $('#graphLink').click(function(event){
+        event.preventDefault();
+        $('#content').css('display', 'none');
+        $('#graph-container').addClass('graph-background').css('display', 'block');
     });
 
     // Event listener for clicking Like Friend link

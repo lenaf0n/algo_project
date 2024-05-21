@@ -1,7 +1,7 @@
 package isep.algoproject.controlllers;
 
-import isep.algoproject.models.Graph;
-import isep.algoproject.models.SearchResultUser;
+import isep.algoproject.models.Dtos.Graph;
+import isep.algoproject.models.Dtos.SearchResultUser;
 import isep.algoproject.models.User;
 import isep.algoproject.services.ConnectionService;
 import isep.algoproject.services.UserService;
@@ -126,5 +126,11 @@ public class UserController {
         model.addAttribute("user", user);
         model.addAttribute("likedUser", likedUser);
         return "user";
+    }
+
+    @GetMapping("/user/interest-graph/{userId}")
+    public ResponseEntity<?> getUserInterestGraph(@PathVariable long userId) {
+        Graph graph = userService.getUserInterestGraph(userId);
+        return ResponseEntity.ok(graph);
     }
 }
