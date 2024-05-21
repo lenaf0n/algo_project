@@ -1,4 +1,6 @@
-package isep.algoproject.models;
+package isep.algoproject.models.Dtos;
+
+import isep.algoproject.models.Interest;
 
 public class SearchResultInterest {
     private Interest interest;

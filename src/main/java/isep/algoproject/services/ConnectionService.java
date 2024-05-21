@@ -58,4 +58,17 @@ public class ConnectionService {
             throw new RuntimeException("Connection not found");
         }
     }
+
+    public String isUserLikedBySessionUser(User user, User sessionUser) {
+        Connection liked1 = connectionRepository.findByUser1IdAndUser2Id(user.getId(), sessionUser.getId());
+        Connection liked2 = connectionRepository.findByUser1IdAndUser2Id(sessionUser.getId(), user.getId());
+
+        if (liked1 != null) {
+            return liked1.getStatus() == Status.PENDING ? "PENDING" : "FRIEND";
+        }
+        if (liked2 != null) {
+            return liked2.getStatus() == Status.PENDING ? "PENDING" : "FRIEND";
+        }
+        return "NONE";
+    }
 }

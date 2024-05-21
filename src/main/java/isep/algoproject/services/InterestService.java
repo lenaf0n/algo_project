@@ -1,6 +1,10 @@
 package isep.algoproject.services;
 
 import isep.algoproject.models.*;
+import isep.algoproject.models.Dtos.Graph;
+import isep.algoproject.models.Dtos.Link;
+import isep.algoproject.models.Dtos.Node;
+import isep.algoproject.models.Dtos.SearchResultInterest;
 import isep.algoproject.models.enums.NodeType;
 import isep.algoproject.repositories.InterestRepository;
 import org.springframework.beans.factory.annotation.Autowired;

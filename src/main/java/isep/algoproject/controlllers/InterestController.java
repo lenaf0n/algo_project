@@ -1,8 +1,8 @@
 package isep.algoproject.controlllers;
 
-import isep.algoproject.models.Graph;
+import isep.algoproject.models.Dtos.Graph;
 import isep.algoproject.models.Interest;
-import isep.algoproject.models.SearchResultInterest;
+import isep.algoproject.models.Dtos.SearchResultInterest;
 import isep.algoproject.models.User;
 import isep.algoproject.services.InterestService;
 import jakarta.servlet.http.HttpSession;

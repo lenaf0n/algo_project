@@ -1,13 +1,12 @@
-const userNameValue = document.getElementById('userName').textContent.trim();
 const svg = d3.select('#graph-container');
 let simulation;
 
-
 async function fetchData() {
+    const userId = $('#userDiv').attr('data-userId');
     try {
         const response = await $.ajax({
             type: 'GET',
-            url: '/user/graph'
+            url: '/user/interest-graph/' + userId
         });
         return response;
     } catch (error) {
@@ -26,9 +25,7 @@ async function fetchData() {
                 return Math.random() * (300 - 100) + 100;
             }))
             .force('charge', d3.forceManyBody().strength(-100))
-
-        window.addEventListener('resize', updateGraphSize);
-        updateGraphSize(simulation);
+            .force('center', d3.forceCenter(400, 350));
 
         const links = svg.selectAll('line')
             .data(data.links)
@@ -40,7 +37,7 @@ async function fetchData() {
             .data(data.nodes)
             .enter().append('circle')
             .attr('r', 10)
-            .attr('fill', d => (d.name === userNameValue) ? 'red' : (d.type === 'USER') ? 'steelblue' : 'rgb(250, 218, 94)')
+            .attr('fill', d => (d.type === 'USER') ? 'steelblue' : 'rgb(250, 218, 94)')
             .call(d3.drag()
                 .on('start', dragstarted)
                 .on('drag', dragged)
@@ -84,12 +81,6 @@ async function fetchData() {
     }
 })();
 
-function updateGraphSize(simulation) {
-    const screenWidth = window.innerWidth;
-    svg.attr('width', screenWidth);
-    simulation.force('center', d3.forceCenter(screenWidth * 0.5, 350));
-}
-
 function dragstarted(event, d) {
     if (!event.active) simulation.alphaTarget(0.3).restart();
     if (d.name === userNameValue) {
@@ -120,9 +111,5 @@ function handleNodeClick(event, d) {
         let cleanedStr = d.id.replace('interest', '');
         console.log(cleanedStr)
         window.location.href = `/interest-page/${cleanedStr}`
-    }
-    else if (d.type === 'USER' && d.name !== userNameValue) {
-        const userId = d.id;
-        window.location.href = `/user-page/${userId}`
     }
 }

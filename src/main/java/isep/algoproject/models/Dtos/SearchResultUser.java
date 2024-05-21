@@ -1,4 +1,6 @@
-package isep.algoproject.models;
+package isep.algoproject.models.Dtos;
+
+import isep.algoproject.models.User;
 
 public class SearchResultUser {
     private User user;
