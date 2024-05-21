@@ -9,7 +9,6 @@ import isep.algoproject.models.enums.NodeType;
 import isep.algoproject.models.enums.Status;
 import isep.algoproject.repositories.ConnectionRepository;
 import isep.algoproject.repositories.InterestRepository;
-import isep.algoproject.repositories.PostRepository;
 import isep.algoproject.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,8 +34,6 @@ public class UserService {
 
     @Autowired
     private InterestRepository interestRepository;
-    @Autowired
-    private PostRepository postRepository;
 
     public User findById(long id){return userRepository.findById(id);}
 
@@ -121,7 +118,7 @@ public class UserService {
         nodes.add(new Node(user.getId().toString(), user.getUsername(), NodeType.USER));
         nodes.addAll(interests.stream()
                 .map(interest -> new Node(interest.getId().toString()+"interest", interest.getName(), NodeType.INTEREST))
-                .collect(Collectors.toList()));
+                .toList());
 
         for (Interest interest : interests) {
             Link link = new Link(user.getId().toString(), interest.getId().toString()+"interest");
@@ -167,7 +164,7 @@ public class UserService {
 
         nodes.addAll(userInterests.stream()
                 .map(interest -> new Node(interest.getId().toString()+"interest", interest.getName(), NodeType.INTEREST))
-                .collect(Collectors.toList()));
+                .toList());
 
         for (User user : users) {
             for (Interest interest : user.getLikedInterests()) {

@@ -20,7 +20,10 @@ public class ImageService {
 
         byte[] compressedImageBytes = outputStream.toByteArray();
 
-        return compressedImageBytes;
+        if (compressedImageBytes.length > 0) {
+            return compressedImageBytes;
+        }
+        return file.getBytes();
     }
 }
 

@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,7 +34,7 @@ public class PostService {
         post.setUser(user);
         post.setCreatedAt(Instant.now());
 
-        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
         if(fileName.contains("..")) {
             throw new FileNotFoundException();
         }
@@ -50,13 +51,16 @@ public class PostService {
     public List<PostIsLiked> getUserPostsByUserId(long userId, User user) {
         List<PostIsLiked> postsIsLiked = new ArrayList<>();
         List<Post> posts = postRepository.findPostsByUserId(userId);
-        for (Post post : posts) {
-            PostIsLiked postIsLiked = new PostIsLiked();
-            postIsLiked.setPost(post);
-            if (post.getLikes().stream().anyMatch(like -> like.getUser().getId() == user.getId())) {
-                postIsLiked.setLiked(true);
+
+        if (posts != null) {
+            for (Post post : posts) {
+                PostIsLiked postIsLiked = new PostIsLiked();
+                postIsLiked.setPost(post);
+                if (post.getLikes() != null && post.getLikes().stream().anyMatch(like -> Objects.equals(like.getUser().getId(), user.getId()))) {
+                    postIsLiked.setLiked(true);
+                }
+                postsIsLiked.add(postIsLiked);
             }
-            postsIsLiked.add(postIsLiked);
         }
 
         return postsIsLiked;
@@ -65,9 +69,17 @@ public class PostService {
     public void likePost(long postId, User user) {
         Post post = postRepository.findPostById(postId);
 
+        if (post == null) {
+            throw new IllegalArgumentException("Post not found with id: " + postId);
+        }
+
         PostLike postLike = new PostLike();
         postLike.setPost(post);
         postLike.setUser(user);
+
+        if (post.getLikes() == null) {
+            post.setLikes(new ArrayList<>());
+        }
 
         post.getLikes().add(postLike);
         postRepository.save(post);
@@ -76,7 +88,7 @@ public class PostService {
     public void unlikePost(long postId, User user) {
         Post post = postRepository.findPostById(postId);
 
-        PostLike postLike = post.getLikes().stream().filter(like -> like.getUser().getId() == user.getId()).findFirst().orElse(null);
+        PostLike postLike = post.getLikes().stream().filter(like -> Objects.equals(like.getUser().getId(), user.getId())).findFirst().orElse(null);
         if(postLike != null) {
             post.getLikes().remove(postLike);
             postRepository.save(post);
@@ -120,7 +132,7 @@ public class PostService {
         for (Post post : posts) {
             PostIsLiked postIsLiked = new PostIsLiked();
             postIsLiked.setPost(post);
-            if (post.getLikes().stream().anyMatch(like -> like.getUser().getId() == user.getId())) {
+            if (post.getLikes().stream().anyMatch(like -> Objects.equals(like.getUser().getId(), user.getId()))) {
                 postIsLiked.setLiked(true);
             }
             postsIsLikedContent.add(postIsLiked);

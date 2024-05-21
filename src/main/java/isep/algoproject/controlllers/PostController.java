@@ -4,7 +4,6 @@ import isep.algoproject.models.*;
 import isep.algoproject.models.Dtos.PostCommentDto;
 import isep.algoproject.models.Dtos.PostIsLiked;
 import isep.algoproject.services.PostService;
-import isep.algoproject.services.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +25,6 @@ import java.util.List;
 public class PostController {
     @Autowired
     private PostService postService;
-
-    @Autowired
-    private UserService userService;
 
     @GetMapping("/post/create")
     public String showCreatePost(Model model) {
