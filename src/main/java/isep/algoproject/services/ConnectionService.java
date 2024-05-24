@@ -30,7 +30,7 @@ public class ConnectionService {
 
     public void deleteConnection(User sessionUser, long userId) {
         Connection connection1 = connectionRepository.findByUser1IdAndUser2Id(sessionUser.getId(), userId);
-        Connection connection2 = connectionRepository.findByUser1IdAndUser2Id(sessionUser.getId(), userId);
+        Connection connection2 = connectionRepository.findByUser1IdAndUser2Id(userId, sessionUser.getId());
 
         if (connection1 != null) {
             connectionRepository.delete(connection1);
@@ -57,5 +57,18 @@ public class ConnectionService {
         } else {
             throw new RuntimeException("Connection not found");
         }
+    }
+
+    public String isUserLikedBySessionUser(User user, User sessionUser) {
+        Connection liked1 = connectionRepository.findByUser1IdAndUser2Id(user.getId(), sessionUser.getId());
+        Connection liked2 = connectionRepository.findByUser1IdAndUser2Id(sessionUser.getId(), user.getId());
+
+        if (liked1 != null) {
+            return liked1.getStatus() == Status.PENDING ? "PENDING" : "FRIEND";
+        }
+        if (liked2 != null) {
+            return liked2.getStatus() == Status.PENDING ? "PENDING" : "FRIEND";
+        }
+        return "NONE";
     }
 }

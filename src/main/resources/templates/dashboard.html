@@ -25,17 +25,21 @@
             <a class="nav-link" id="searchLink" data-toggle="modal" data-target="#searchModal" href="#">Search<i class="bi-search pl-1"></i></a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" th:href="@{/messages}">Chat<i class="bi bi-chat pl-1"></i></a>
+            <a class="nav-link" th:href="@{/message}">Chat<i class="bi bi-chat pl-1"></i></a>
         </li>
         <li class="nav-item">
             <a class="nav-link" id="notificationsLink" data-toggle="modal" data-target="#connectionModal" href="#">Notifications<i class="bi-bell pl-1"></i></a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#">Posts<i class="bi bi-file pl-1"></i></a>
+            <a class="nav-link" th:href="@{post/all}">Posts<i class="bi bi-file pl-1"></i></a>
         </li>
         <li class="nav-item">
             <a class="nav-link" th:href="@{/profile}">Profile<i class="bi-person pl-1"></i></a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/interest/create}">Create interest<i class="bi bi-journal-plus pl-1"></i></a>
+        </li>
+
     </ul>
 </nav>
 
@@ -49,8 +53,9 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
+            <small class="text-muted ml-3">To search for interests add # before, to search for people just type.</small>
             <div class="modal-body">
-                <input type="text" class="form-control" id="searchInput" placeholder="Search by username">
+                <input type="text" class="form-control" id="searchInput" placeholder="Search">
                 <ul id="userList" class="list-group mt-2">
                     <!-- User list items will be populated here -->
                 </ul>
@@ -81,6 +86,6 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="/webjars/bootstrap/4.6.2/js/bootstrap.min.js"></script>
 <script src="/js/dashboard.js"></script>
-<script src="/js/graph.js"></script>
+<script src="/js/user-graph.js"></script>
 </body>
 </html>

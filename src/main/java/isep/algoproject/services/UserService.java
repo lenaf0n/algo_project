@@ -1,9 +1,14 @@
 package isep.algoproject.services;
 
 import isep.algoproject.models.*;
+import isep.algoproject.models.Dtos.Graph;
+import isep.algoproject.models.Dtos.Link;
+import isep.algoproject.models.Dtos.Node;
+import isep.algoproject.models.Dtos.SearchResultUser;
 import isep.algoproject.models.enums.NodeType;
 import isep.algoproject.models.enums.Status;
 import isep.algoproject.repositories.ConnectionRepository;
+import isep.algoproject.repositories.InterestRepository;
 import isep.algoproject.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,6 +31,9 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private InterestRepository interestRepository;
 
     public User findById(long id){return userRepository.findById(id);}
 
@@ -74,7 +82,9 @@ public class UserService {
         users.addAll(usersToAdd);
         Set<Connection> userConnectionsSet = new HashSet<>(userConnections);
 
-        return createGraph(users, new ArrayList<>(userConnectionsSet));
+        List<Interest> userInterests = interestRepository.findInterestByLikedByUsersIn(users);
+
+        return createGraph(users, new ArrayList<>(userConnectionsSet), userInterests);
     }
 
 
@@ -95,6 +105,27 @@ public class UserService {
         }
 
         return searchResultUsers;
+    }
+
+    public Graph getUserInterestGraph(long userId) {
+        User user = userRepository.findById(userId);
+
+        List<Interest> interests = user.getLikedInterests();
+
+        List<Node> nodes = new ArrayList<>();
+        List<Link> links = new ArrayList<>();
+
+        nodes.add(new Node(user.getId().toString(), user.getUsername(), NodeType.USER));
+        nodes.addAll(interests.stream()
+                .map(interest -> new Node(interest.getId().toString()+"interest", interest.getName(), NodeType.INTEREST))
+                .toList());
+
+        for (Interest interest : interests) {
+            Link link = new Link(user.getId().toString(), interest.getId().toString()+"interest");
+            links.add(link);
+        }
+
+        return new Graph(nodes, links);
     }
 
     private Status getConnectionStatus(User user1, User user2) {
@@ -122,15 +153,26 @@ public class UserService {
         return new ArrayList<>(distinctUsers);
     }
 
-    private Graph createGraph(List<User> users, List<Connection> connections) {
-        List<Node> userNodes = users.stream()
+    private Graph createGraph(List<User> users, List<Connection> connections, List<Interest> userInterests) {
+        List<Node> nodes = users.stream()
                 .map(user -> new Node(user.getId().toString(), user.getName(), NodeType.USER))
                 .collect(Collectors.toList());
 
-        List<Link> userLinks = connections.stream()
+        List<Link> links = connections.stream()
                 .map(connection -> new Link(connection.getUser1().getId().toString(), connection.getUser2().getId().toString()))
                 .collect(Collectors.toList());
 
-        return new Graph(userNodes, userLinks);
+        nodes.addAll(userInterests.stream()
+                .map(interest -> new Node(interest.getId().toString()+"interest", interest.getName(), NodeType.INTEREST))
+                .toList());
+
+        for (User user : users) {
+            for (Interest interest : user.getLikedInterests()) {
+                Link link = new Link(user.getId().toString(), interest.getId().toString()+"interest");
+                links.add(link);
+            }
+        }
+
+        return new Graph(nodes, links);
     }
 }

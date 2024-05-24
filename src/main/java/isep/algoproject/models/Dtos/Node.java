@@ -1,4 +1,4 @@
-package isep.algoproject.models;
+package isep.algoproject.models.Dtos;
 
 import isep.algoproject.models.enums.NodeType;
 
