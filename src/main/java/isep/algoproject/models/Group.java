@@ -11,85 +11,55 @@ public class Group implements Serializable {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
-    @Column(nullable = false)
-    private long sendUserId;
-    private long recipientId;
-    private String content;
+    private String name;
+    private String description;
     @Lob
     @Column(columnDefinition = "MEDIUMBLOB")
     private String image;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private MessageCategory category;
     @Column(nullable = false)
     private Instant createdAt;
-    @Column(nullable = false)
-    private boolean isRead;
-
-
-    // Getter and Setter
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
 
     public Long getId() {
         return id;
-    }
-
-    public MessageCategory getCategory() {
-        return category;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public String getImage() {
-        return image;
     }
 
     public void setId(Long id) {
         this.id = id;
     }
 
-    public void setCategory(MessageCategory category) {
-        this.category = category;
+    public String getName() {
+        return name;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getImage() {
+        return image;
     }
 
     public void setImage(String image) {
         this.image = image;
     }
 
-    public long getSendUserId() {
-        return sendUserId;
+    public Instant getCreatedAt() {
+        return createdAt;
     }
 
-    public void setSendUserId(long sendUserId) {
-        this.sendUserId = sendUserId;
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
     }
 
-    public long getRecipientId() {
-        return recipientId;
-    }
+    // Getter and Setter
 
-    public void setRecipientId(long recipientId) {
-        this.recipientId = recipientId;
-    }
-
-    public boolean isRead() {
-        return isRead;
-    }
-
-    public void setRead(boolean read) {
-        isRead = read;
-    }
 }

@@ -1,8 +1,10 @@
 package isep.algoproject.controlllers;
 
+import isep.algoproject.models.Group;
 import isep.algoproject.models.Message;
 import isep.algoproject.models.User;
 import isep.algoproject.models.enums.MessageCategory;
+import isep.algoproject.services.GroupService;
 import isep.algoproject.services.MessageService;
 import isep.algoproject.services.UserService;
 import jakarta.servlet.http.HttpSession;
@@ -24,6 +26,8 @@ public class MessageController {
     private MessageService messageService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private GroupService groupService;
 
     @GetMapping("/message")
     public String dashboard(Model model, HttpSession session) {
