@@ -126,14 +126,19 @@ public class InterestServiceTests {
         Interest interest = new Interest();
         interest.setId(1L);
         interest.setName("Music");
+
         User user = new User();
         user.setId(1L);
         user.setUsername("john_doe");
+
+        User sessionUser = new User();
+        sessionUser.setId(2L);
+
         List<User> likedByUsers = new ArrayList<>();
         likedByUsers.add(user);
         interest.setLikedByUsers(likedByUsers);
 
-        Graph graph = interestService.getGraphInterest(interest);
+        Graph graph = interestService.getGraphInterest(interest, sessionUser);
 
         assertEquals(2, graph.getNodes().size());
         assertEquals(1, graph.getLinks().size());

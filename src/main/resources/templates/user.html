@@ -33,6 +33,7 @@
 
 <div class="container text-center mt-4" th:data-userId="${user.getId()}" id="userDiv">
     <h1 th:text="${user.getUsername()} + ' Page'"></h1>
+    <p th:text="${user.getBio()}"></p>
 </div>
 
 <div class="container text-center mt-3 pb-2 border-bottom" id="linkContainer">

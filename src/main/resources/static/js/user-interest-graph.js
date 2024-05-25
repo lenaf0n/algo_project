@@ -8,7 +8,10 @@ async function fetchData() {
             type: 'GET',
             url: '/user/interest-graph/' + userId
         });
-        return response;
+        if (response != null) {
+            return response;
+        }
+        alert("This user is private!");
     } catch (error) {
         console.error('Error:', error);
         throw error;

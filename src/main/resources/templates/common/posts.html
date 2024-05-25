@@ -1,0 +1,49 @@
+<siv th:fragment="post-list">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-7" th:if="${posts.size() == 0}">
+                <p>No posts available.</p>
+            </div>
+            <div class="col-md-7 content-column" th:each="postIsLiked : ${posts}">
+                <div class="card mb-5">
+                    <div th:if="${postIsLiked.getPost().getImage() != null}">
+                        <img class="card-img-top" th:src="'data:image/png;base64,' + ${postIsLiked.getPost().getImage()}" alt="Post Image">
+                    </div>
+                    <p class="card-text" th:utext="'<strong>@' + ${postIsLiked.getPost().getUser().getUsername()} + '</strong> : ' + ${postIsLiked.getPost().getContent()}"></p>
+                    <p class="card-text"><small class="text-muted" th:text="${postIsLiked.getPost().getCreatedAt()}"></small></p>
+                    <div class="card-body">
+                        <div class="row justify-content-around">
+                            <p class="card-text">
+                                <button class="btn btn-sm btn-outline-secondary comments-btn" th:data-postId="${postIsLiked.getPost().getId()}" th:data-post="${postIsLiked.getPost().getContent()}">
+                                    Comments
+                                </button>
+                                <small class="text-muted" th:text="${postIsLiked.getPost().getComments().size()} + ' comments'"></small>
+                            </p>
+                            <p class="card-text">
+                                <button class="btn btn-sm btn-outline-primary like-btn" th:data-postid="${postIsLiked.getPost().getId()}" th:data-liked="${postIsLiked.liked}">
+                                    <span class="like-text" th:text="${postIsLiked.isLiked() ? 'Unlike' : 'Like'}"></span>
+                                </button>
+                                <small class="text-muted" th:text="${postIsLiked.getPost().getLikes().size()} + ' likes'"
+                                       th:classappend="${postIsLiked.isLiked() ? 'liked' : ''}">
+                                </small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div id="sticky-sidebar" style="display: none; top: 250px; height: 70vh">
+                    <div class="content mb-3 pl-1" id="post-content"></div>
+                    <div id="comments"></div>
+                    <form class="form-inline" id="comment-form">
+                        <input class="form-control mr-2" type="text" name="content" id="commentContent" placeholder="Comment" required>
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-primary bg-white" type="submit">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</siv>

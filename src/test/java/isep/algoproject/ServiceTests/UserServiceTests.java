@@ -3,6 +3,7 @@ package isep.algoproject.ServiceTests;
 import isep.algoproject.models.*;
 import isep.algoproject.models.Dtos.Graph;
 import isep.algoproject.models.Dtos.Node;
+import isep.algoproject.models.Dtos.PrivacyForm;
 import isep.algoproject.models.Dtos.SearchResultUser;
 import isep.algoproject.models.enums.Status;
 import isep.algoproject.repositories.ConnectionRepository;
@@ -186,6 +187,10 @@ public class UserServiceTests {
 
     @Test
     void getUserInterestGraph_UserHasInterests() {
+        User sessionUser = new User();
+        sessionUser.setId(2L);
+        sessionUser.setUsername("sessionUser");
+
         User user = new User();
         user.setId(1L);
         user.setUsername("testuser");
@@ -203,7 +208,79 @@ public class UserServiceTests {
 
         when(userRepository.findById(1L)).thenReturn(user);
 
-        Graph graph = userService.getUserInterestGraph(1L);
+        Graph graph = userService.getUserInterestGraph(1L, sessionUser);
+
+        assertNotNull(graph);
+        assertEquals(3, graph.getNodes().size());
+        assertEquals(2, graph.getLinks().size());
+
+        List<String> nodeIds = graph.getNodes().stream().map(Node::getId).toList();
+        assertTrue(nodeIds.contains("1"));
+        assertTrue(nodeIds.contains("2interest"));
+        assertTrue(nodeIds.contains("3interest"));
+
+        List<String> linkIds = graph.getLinks().stream().map(link -> link.getSource() + "-" + link.getTarget()).toList();
+        assertTrue(linkIds.contains("1-2interest"));
+        assertTrue(linkIds.contains("1-3interest"));
+    }
+
+    @Test
+    void getUserInterestGraph_UserHasPrivacyNoFriends() {
+        User sessionUser = new User();
+        sessionUser.setId(2L);
+        sessionUser.setUsername("sessionUser");
+
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("testuser");
+        user.setInterestPrivacy(true);
+
+        Interest interest1 = new Interest();
+        interest1.setId(2L);
+        interest1.setName("Interest1");
+
+        Interest interest2 = new Interest();
+        interest2.setId(3L);
+        interest2.setName("Interest2");
+
+        List<Interest> interests = Arrays.asList(interest1, interest2);
+        user.setLikedInterests(interests);
+
+        when(userRepository.findById(1L)).thenReturn(user);
+
+        Graph graph = userService.getUserInterestGraph(1L, sessionUser);
+
+        assertNull(graph);
+    }
+
+    @Test
+    void getUserInterestGraph_UserHasPrivacyAndFriends() {
+        User sessionUser = new User();
+        sessionUser.setId(2L);
+        sessionUser.setUsername("sessionUser");
+
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("testuser");
+        user.setInterestPrivacy(true);
+
+        Interest interest1 = new Interest();
+        interest1.setId(2L);
+        interest1.setName("Interest1");
+
+        Interest interest2 = new Interest();
+        interest2.setId(3L);
+        interest2.setName("Interest2");
+
+        List<Interest> interests = Arrays.asList(interest1, interest2);
+        user.setLikedInterests(interests);
+
+        when(userRepository.findById(1L)).thenReturn(user);
+        when(connectionRepository.existsByUser1IdAndUser2IdAndStatus(1L, 2L, Status.FRIEND)).thenReturn(true);
+        when(connectionRepository.existsByUser1IdAndUser2IdAndStatus(2L, 1L, Status.FRIEND)).thenReturn(false);
+
+
+        Graph graph = userService.getUserInterestGraph(1L, sessionUser);
 
         assertNotNull(graph);
         assertEquals(3, graph.getNodes().size());
@@ -226,9 +303,13 @@ public class UserServiceTests {
         user.setUsername("testuser");
         user.setLikedInterests(List.of());
 
+        User sessionUser = new User();
+        sessionUser.setId(2L);
+        sessionUser.setUsername("sessionUser");
+
         when(userRepository.findById(1L)).thenReturn(user);
 
-        Graph graph = userService.getUserInterestGraph(1L);
+        Graph graph = userService.getUserInterestGraph(1L, sessionUser);
 
         assertNotNull(graph);
         assertEquals(1, graph.getNodes().size());
@@ -240,8 +321,28 @@ public class UserServiceTests {
 
     @Test
     void getUserInterestGraph_UserNotFound() {
+        User sessionUser = new User();
+        sessionUser.setId(2L);
+        sessionUser.setUsername("sessionUser");
+
         when(userRepository.findById(1L)).thenReturn(null);
 
-        assertThrows(NullPointerException.class, () -> userService.getUserInterestGraph(1L));
+        assertThrows(NullPointerException.class, () -> userService.getUserInterestGraph(1L, sessionUser));
+    }
+
+    @Test
+    void testSaveUserPrivacySettings() {
+        User user = new User();
+        PrivacyForm privacyForm = new PrivacyForm();
+        privacyForm.setInterestPrivacy(true);
+        privacyForm.setPostPrivacy(true);
+        privacyForm.setGraphPrivacy(false);
+
+        userService.saveUserPrivacySettings(user, privacyForm);
+
+        verify(userRepository, times(1)).save(user);
+        assertTrue(user.isInterestPrivacy());
+        assertFalse(user.isGraphPrivacy());
+        assertTrue(user.isPostPrivacy());
     }
 }

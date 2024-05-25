@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 public class User implements Serializable {
@@ -37,6 +38,15 @@ public class User implements Serializable {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostComment> comments;
+
+    @Column(nullable = false)
+    private boolean postPrivacy = false;
+
+    @Column(nullable = false)
+    private boolean interestPrivacy = false;
+
+    @Column(nullable = false)
+    private boolean graphPrivacy = false;
 
     public Long getId() {
         return id;
@@ -116,5 +126,42 @@ public class User implements Serializable {
 
     public void setComments(List<PostComment> comments) {
         this.comments = comments;
+    }
+
+    public boolean isPostPrivacy() {
+        return postPrivacy;
+    }
+
+    public void setPostPrivacy(boolean postPrivacy) {
+        this.postPrivacy = postPrivacy;
+    }
+
+    public boolean isInterestPrivacy() {
+        return interestPrivacy;
+    }
+
+    public void setInterestPrivacy(boolean interestPrivacy) {
+        this.interestPrivacy = interestPrivacy;
+    }
+
+    public boolean isGraphPrivacy() {
+        return graphPrivacy;
+    }
+
+    public void setGraphPrivacy(boolean graphPrivacy) {
+        this.graphPrivacy = graphPrivacy;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return postPrivacy == user.postPrivacy && interestPrivacy == user.interestPrivacy && graphPrivacy == user.graphPrivacy && Objects.equals(id, user.id) && Objects.equals(username, user.username) && Objects.equals(name, user.name) && Objects.equals(email, user.email) && Objects.equals(password, user.password) && Objects.equals(bio, user.bio)  && Objects.equals(posts, user.posts) && Objects.equals(likes, user.likes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, username, name, email, password, bio, likedInterests, posts, likes, comments, postPrivacy, interestPrivacy, graphPrivacy);
     }
 }

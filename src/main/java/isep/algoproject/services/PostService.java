@@ -3,8 +3,11 @@ package isep.algoproject.services;
 import isep.algoproject.models.*;
 import isep.algoproject.models.Dtos.PostCommentDto;
 import isep.algoproject.models.Dtos.PostIsLiked;
+import isep.algoproject.models.enums.Status;
+import isep.algoproject.repositories.ConnectionRepository;
 import isep.algoproject.repositories.PostCommentRepository;
 import isep.algoproject.repositories.PostRepository;
+import isep.algoproject.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,12 @@ public class PostService {
     @Autowired
     private ImageService imageService;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ConnectionRepository connectionRepository;
+
     public void createPost(Post post, User user, MultipartFile file) throws FileNotFoundException {
         post.setUser(user);
         post.setCreatedAt(Instant.now());
@@ -48,21 +57,24 @@ public class PostService {
         postRepository.save(post);
     }
 
-    public List<PostIsLiked> getUserPostsByUserId(long userId, User user) {
+    public List<PostIsLiked> getUserPostsByUserId(long userId, User sessionUser) {
         List<PostIsLiked> postsIsLiked = new ArrayList<>();
-        List<Post> posts = postRepository.findPostsByUserId(userId);
+        User user = userRepository.findById(userId);
+        List<Post> posts = postRepository.findPostsByUserIdOrderByCreatedAtDesc(userId);
 
-        if (posts != null) {
+        boolean connection1 = connectionRepository.existsByUser1IdAndUser2IdAndStatus(userId, sessionUser.getId(), Status.FRIEND);
+        boolean connection2 = connectionRepository.existsByUser1IdAndUser2IdAndStatus(sessionUser.getId(), userId, Status.FRIEND);
+
+        if (posts != null && (!user.isPostPrivacy() || connection1 || connection2 || Objects.equals(user.getId(), sessionUser.getId()))) {
             for (Post post : posts) {
                 PostIsLiked postIsLiked = new PostIsLiked();
                 postIsLiked.setPost(post);
-                if (post.getLikes() != null && post.getLikes().stream().anyMatch(like -> Objects.equals(like.getUser().getId(), user.getId()))) {
+                if (post.getLikes() != null && post.getLikes().stream().anyMatch(like -> Objects.equals(like.getUser().getId(), sessionUser.getId()))) {
                     postIsLiked.setLiked(true);
                 }
                 postsIsLiked.add(postIsLiked);
             }
         }
-
         return postsIsLiked;
     }
 
@@ -130,13 +142,19 @@ public class PostService {
 
         List<PostIsLiked> postsIsLikedContent = new ArrayList<>();
         for (Post post : posts) {
-            PostIsLiked postIsLiked = new PostIsLiked();
-            postIsLiked.setPost(post);
-            if (post.getLikes().stream().anyMatch(like -> Objects.equals(like.getUser().getId(), user.getId()))) {
-                postIsLiked.setLiked(true);
+            User postOwner = post.getUser();
+            boolean connection1 = connectionRepository.existsByUser1IdAndUser2IdAndStatus(postOwner.getId(), user.getId(), Status.FRIEND);
+            boolean connection2 = connectionRepository.existsByUser1IdAndUser2IdAndStatus(user.getId(), postOwner.getId(), Status.FRIEND);
+
+            if (!postOwner.isPostPrivacy() || connection1 || connection2 || Objects.equals(user.getId(), postOwner.getId())) {
+                PostIsLiked postIsLiked = new PostIsLiked();
+                postIsLiked.setPost(post);
+                postIsLiked.setLiked(post.getLikes().stream().anyMatch(like -> Objects.equals(like.getUser().getId(), user.getId())));
+                postsIsLikedContent.add(postIsLiked);
             }
-            postsIsLikedContent.add(postIsLiked);
         }
+
         return new PageImpl<>(postsIsLikedContent, pageable, posts.getTotalElements());
     }
+
 }

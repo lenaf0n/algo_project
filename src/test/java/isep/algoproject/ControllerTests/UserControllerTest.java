@@ -1,10 +1,7 @@
 package isep.algoproject.ControllerTests;
 
 import isep.algoproject.controlllers.UserController;
-import isep.algoproject.models.Dtos.Graph;
-import isep.algoproject.models.Dtos.Link;
-import isep.algoproject.models.Dtos.Node;
-import isep.algoproject.models.Dtos.SearchResultUser;
+import isep.algoproject.models.Dtos.*;
 import isep.algoproject.models.User;
 import isep.algoproject.services.ConnectionService;
 import isep.algoproject.services.UserService;
@@ -237,13 +234,71 @@ public class UserControllerTest {
 
     @Test
     void getUserInterestGraph() {
+        User sessionUser = new User();
+        sessionUser.setId(2L);
+        sessionUser.setUsername("sessionUser");
+
+        when(session.getAttribute("user")).thenReturn(sessionUser);
+
         List<Node> nodes = new ArrayList<>();
         List<Link> links = new ArrayList<>();
         Graph graph = new Graph(nodes, links);
-        when(userService.getUserInterestGraph(1L)).thenReturn(graph);
+        when(userService.getUserInterestGraph(1L, sessionUser)).thenReturn(graph);
 
-        ResponseEntity<?> response = userController.getUserInterestGraph(1L);
+        ResponseEntity<?> response = userController.getUserInterestGraph(1L, session);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(graph, response.getBody());
+    }
+
+    @Test
+    void getUserInterestGraph_UserNotLoggedIn() {
+        when(session.getAttribute("user")).thenReturn(null);
+
+        ResponseEntity<?> response = userController.getUserInterestGraph(1L, session);
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertInstanceOf(RedirectView.class, response.getBody());
+    }
+
+    @Test
+    void testShowForm() {
+        User sessionUser = new User();
+        when(session.getAttribute("user")).thenReturn(sessionUser);
+
+        String result = userController.showPrivacyForm(model, session);
+
+        assertEquals("privacyForm", result);
+        verify(model).addAttribute("user", sessionUser);
+        verify(model).addAttribute(eq("privacyForm"), any(PrivacyForm.class));
+    }
+
+    @Test
+    void testShowForm_LoginError() {
+        when(session.getAttribute("user")).thenReturn(null);
+
+        String viewName = userController.showPrivacyForm(model, session);
+
+        assertEquals("redirect:/login", viewName);
+    }
+
+    @Test
+    void testSubmitForm() {
+        PrivacyForm privacyForm = new PrivacyForm();
+        User sessionUser = new User();
+        when(session.getAttribute("user")).thenReturn(sessionUser);
+
+        String viewName = userController.submitPrivacyForm(privacyForm, session);
+
+        assertEquals("redirect:/profile", viewName);
+        verify(userService, times(1)).saveUserPrivacySettings(sessionUser, privacyForm);
+    }
+
+    @Test
+    void testSubmitForm_LoginError() {
+        PrivacyForm privacyForm = new PrivacyForm();
+        when(session.getAttribute("user")).thenReturn(null);
+
+        String viewName = userController.submitPrivacyForm(privacyForm, session);
+
+        assertEquals("redirect:/login", viewName);
     }
 }

@@ -185,11 +185,15 @@ public class InterestControllerTest {
     @Test
     void getInterestGraph_Success() {
         Interest interest = new Interest();
+        User user = new User();
+        user.setId(2L);
         when(session.getAttribute("interest")).thenReturn(interest);
+        when(session.getAttribute("user")).thenReturn(user);
+
         List<Node> nodes = new ArrayList<>();
         List<Link> links = new ArrayList<>();
         Graph graph = new Graph(nodes, links);
-        when(interestService.getGraphInterest(interest)).thenReturn(graph);
+        when(interestService.getGraphInterest(interest, user)).thenReturn(graph);
 
         ResponseEntity<?> response = interestController.getInterestGraph(session);
         assertEquals(HttpStatus.OK, response.getStatusCode());

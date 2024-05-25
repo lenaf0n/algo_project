@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Privacy Form</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+    <!-- Display user information -->
+    <div class="card mt-5">
+        <div class="card-header">
+            User Information
+        </div>
+        <div class="card-body row">
+            <div class="col-6">
+                <h5 class="card-title" th:text="${user.name}"></h5>
+                <p class="card-text">
+                    <strong>Username:</strong> <span th:text="${user.username}"></span><br>
+                    <strong>Email:</strong> <span th:text="${user.email}"></span><br>
+                    <strong>Bio:</strong> <span th:text="${user.bio}"></span>
+                </p>
+            </div>
+            <div class="col-6">
+                <h6>Privacy Settings:</h6>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="interestPrivacyInfo" th:checked="${user.interestPrivacy}">
+                    <label class="form-check-label" for="interestPrivacy">Interest Privacy</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="graphPrivacyInfo" th:checked="${user.graphPrivacy}">
+                    <label class="form-check-label" for="graphPrivacy">Graph Privacy</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="postPrivacyInfo" th:checked="${user.postPrivacy}">
+                    <label class="form-check-label" for="postPrivacy">Post Privacy</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Form -->
+    <h2 class="mt-3">Privacy Settings</h2>
+    <form th:action="@{/submitPrivacyForm}" th:object="${privacyForm}" method="post" class="mt-3">
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" th:field="*{interestPrivacy}" id="interestPrivacy">
+            <label class="form-check-label" for="interestPrivacy">Interest Privacy</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" th:field="*{graphPrivacy}" id="graphPrivacy">
+            <label class="form-check-label" for="graphPrivacy">Graph Privacy</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" th:field="*{postPrivacy}" id="postPrivacy">
+            <label class="form-check-label" for="postPrivacy">Post Privacy</label>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Submit</button>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

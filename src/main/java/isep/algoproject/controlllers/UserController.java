@@ -1,11 +1,13 @@
 package isep.algoproject.controlllers;
 
 import isep.algoproject.models.Dtos.Graph;
+import isep.algoproject.models.Dtos.PrivacyForm;
 import isep.algoproject.models.Dtos.SearchResultUser;
 import isep.algoproject.models.User;
 import isep.algoproject.services.ConnectionService;
 import isep.algoproject.services.UserService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -129,8 +131,36 @@ public class UserController {
     }
 
     @GetMapping("/user/interest-graph/{userId}")
-    public ResponseEntity<?> getUserInterestGraph(@PathVariable long userId) {
-        Graph graph = userService.getUserInterestGraph(userId);
+    public ResponseEntity<?> getUserInterestGraph(@PathVariable long userId, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new RedirectView("/login"));
+        }
+
+        Graph graph = userService.getUserInterestGraph(userId, user);
         return ResponseEntity.ok(graph);
+    }
+
+    @GetMapping("/privacyForm")
+    public String showPrivacyForm(Model model, HttpSession session) {
+        User sessionUser = (User) session.getAttribute("user");
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("user", sessionUser);
+        model.addAttribute("privacyForm", new PrivacyForm());
+        return "privacyForm";
+    }
+
+    @PostMapping("/submitPrivacyForm")
+    public String submitPrivacyForm(@Valid PrivacyForm privacyForm, HttpSession session) {
+        User sessionUser = (User) session.getAttribute("user");
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+
+        userService.saveUserPrivacySettings(sessionUser, privacyForm);
+        return "redirect:/profile";
     }
 }
