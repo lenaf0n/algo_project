@@ -13,13 +13,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
+import java.io.File;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class UserController {
@@ -150,6 +150,13 @@ public class UserController {
 
         model.addAttribute("user", sessionUser);
         model.addAttribute("privacyForm", new PrivacyForm());
+
+        File iconsFolder = new File("src/main/resources/static/images/icons");
+        List<String> images = Arrays.stream(iconsFolder.listFiles())
+                .map(File::getName)
+                .collect(Collectors.toList());
+        model.addAttribute("images", images);
+
         return "privacyForm";
     }
 
@@ -161,6 +168,28 @@ public class UserController {
         }
 
         userService.saveUserPrivacySettings(sessionUser, privacyForm);
+        return "redirect:/profile";
+    }
+
+    @PostMapping("/saveProfileImage/{image}")
+    public String saveProfileImage(@PathVariable String image, HttpSession session) {
+        User sessionUser = (User) session.getAttribute("user");
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+
+        userService.saveProfileImage(sessionUser, image);
+        return "redirect:/profile";
+    }
+
+    @PostMapping("/updateBio")
+    public String updateBio(@RequestParam("bio") String bio, HttpSession session) {
+        User sessionUser = (User) session.getAttribute("user");
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+
+        userService.saveProfileBio(sessionUser, bio);
         return "redirect:/profile";
     }
 }

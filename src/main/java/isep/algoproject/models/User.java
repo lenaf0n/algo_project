@@ -48,6 +48,8 @@ public class User implements Serializable {
     @Column(nullable = false)
     private boolean graphPrivacy = false;
 
+    private String image;
+
     public Long getId() {
         return id;
     }
@@ -152,16 +154,11 @@ public class User implements Serializable {
         this.graphPrivacy = graphPrivacy;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return postPrivacy == user.postPrivacy && interestPrivacy == user.interestPrivacy && graphPrivacy == user.graphPrivacy && Objects.equals(id, user.id) && Objects.equals(username, user.username) && Objects.equals(name, user.name) && Objects.equals(email, user.email) && Objects.equals(password, user.password) && Objects.equals(bio, user.bio)  && Objects.equals(posts, user.posts) && Objects.equals(likes, user.likes);
+    public String getImage() {
+        return image;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, username, name, email, password, bio, likedInterests, posts, likes, comments, postPrivacy, interestPrivacy, graphPrivacy);
+    public void setImage(String image) {
+        this.image = image;
     }
 }

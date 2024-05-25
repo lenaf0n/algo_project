@@ -345,4 +345,26 @@ public class UserServiceTests {
         assertFalse(user.isGraphPrivacy());
         assertTrue(user.isPostPrivacy());
     }
+
+    @Test
+    void testSaveProfileImage() {
+        User user = new User();
+        String image = "profile_image.jpg";
+
+        userService.saveProfileImage(user, image);
+
+        assertEquals(image, user.getImage());
+        verify(userRepository, times(1)).save(user);
+    }
+
+    @Test
+    void testSaveProfileBio() {
+        User user = new User();
+        String bio = "This is a test bio.";
+
+        userService.saveProfileBio(user, bio);
+
+        assertEquals(bio, user.getBio());
+        verify(userRepository, times(1)).save(user);
+    }
 }

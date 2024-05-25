@@ -301,4 +301,42 @@ public class UserControllerTest {
 
         assertEquals("redirect:/login", viewName);
     }
+
+    @Test
+    void saveProfileImage_UserNotLoggedIn() {
+        when(session.getAttribute("user")).thenReturn(null);
+
+        String viewName = userController.saveProfileImage("image", session);
+        assertEquals("redirect:/login", viewName);
+        verify(userService, never()).saveProfileImage(any(User.class), anyString());
+    }
+
+    @Test
+    void saveProfileImage_UserLoggedIn() {
+        User user = new User();
+        when(session.getAttribute("user")).thenReturn(user);
+
+        String viewName = userController.saveProfileImage("image", session);
+        assertEquals("redirect:/profile", viewName);
+        verify(userService, times(1)).saveProfileImage(user, "image");
+    }
+
+    @Test
+    void updateBio_UserNotLoggedIn() {
+        when(session.getAttribute("user")).thenReturn(null);
+
+        String viewName = userController.updateBio("bio", session);
+        assertEquals("redirect:/login", viewName);
+        verify(userService, never()).saveProfileBio(any(User.class), anyString());
+    }
+
+    @Test
+    void updateBio_UserLoggedIn() {
+        User user = new User();
+        when(session.getAttribute("user")).thenReturn(user);
+
+        String viewName = userController.updateBio("bio", session);
+        assertEquals("redirect:/profile", viewName);
+        verify(userService, times(1)).saveProfileBio(user, "bio");
+    }
 }

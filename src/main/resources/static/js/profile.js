@@ -58,9 +58,11 @@ $(document).ready(function(){
             success: function(data) {
                 $('#content').html(data);
             },
-            error: function() {
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log("Error details:", jqXHR, textStatus, errorThrown);
                 alert('Error loading the page');
             }
         });
     });
+
 });

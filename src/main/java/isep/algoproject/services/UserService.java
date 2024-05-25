@@ -145,6 +145,16 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public void saveProfileImage(User user, String image) {
+        user.setImage(image);
+        userRepository.save(user);
+    }
+
+    public void saveProfileBio(User user, String bio) {
+        user.setBio(bio);
+        userRepository.save(user);
+    }
+
     private Status getConnectionStatus(User user1, User user2) {
         Connection connection1 = connectionRepository.findByUser1IdAndUser2Id(user1.getId(), user2.getId());
         Connection connection2 = connectionRepository.findByUser1IdAndUser2Id(user2.getId(), user1.getId());
