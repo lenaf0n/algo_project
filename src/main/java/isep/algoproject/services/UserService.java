@@ -193,12 +193,12 @@ public class UserService {
                 .map(interest -> new Node(interest.getId().toString()+"interest", interest.getName(), NodeType.INTEREST))
                 .toList());
 
-        for (User user : users) {
-            for (Interest interest : user.getLikedInterests()) {
-                Link link = new Link(user.getId().toString(), interest.getId().toString()+"interest");
-                links.add(link);
-            }
-        }
+        users.stream()
+                .flatMap(user -> user.getLikedInterests().stream()
+                        .map(interest -> new Link(user.getId().toString(), interest.getId().toString() + "interest")))
+                .forEach(links::add);
+
+
 
         return new Graph(nodes, links);
     }
