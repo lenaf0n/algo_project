@@ -1,16 +1,22 @@
 package isep.algoproject.models;
 
-import isep.algoproject.models.enums.MessageCategory;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
 import java.time.Instant;
 
 @Entity
+@Table(name="groups")
 public class Group implements Serializable {
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
+    private User user;
+    @Column(nullable = false)
     private String name;
     private String description;
     @Lob
@@ -20,12 +26,22 @@ public class Group implements Serializable {
     @Column(nullable = false)
     private Instant createdAt;
 
+    // Getter and Setter
+
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getName() {
@@ -59,7 +75,5 @@ public class Group implements Serializable {
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
-
-    // Getter and Setter
 
 }

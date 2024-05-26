@@ -10,9 +10,9 @@ import java.util.List;
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
-    List<Message> findByCategory(MessageCategory category);
+    List<Message> findByCategoryOrderByCreatedAt(MessageCategory category);
 
-    List<Message> findByRecipientId(long id);
+    List<Message> findByRecipientIdAndCategoryOrderByCreatedAt(long id, MessageCategory category);
 
     List<Message> findById(long id);
 }

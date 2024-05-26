@@ -6,45 +6,47 @@
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.6.2/css/bootstrap.min.css}"/>
     <link rel="stylesheet" href="/css/index.css"/>
     <link rel="stylesheet" href="/css/common.css"/>
+    <style>
+        .invisible{
+            display : none;
+        }
+    </style>
 </head>
 <body>
-    <div class="container-fluid row vh-100 clearfix">
-        <div class="col-sm-4 d-flex flex-column bg-white" id="groupPart">
-            <div>
-                <h1>Global Message</h1>
+<header th:insert="~{common/navbar :: navbar}"></header>
+    <div class="container-fluid row vh-100 clearfix m-0 p-0">
+        <div class="col-3 mh-100 d-flex flex-column bg-white p-0" id="groupPart">
+            <div class="container-fluid row p-0 m-0" id="messageTypeSelector">
+                <button type="button" id="globalButton" class="btn btn-outline-info col-4 selected">Global</button>
+                <button type="button" id="groupsButton" class="btn btn-outline-info col-4">Groups</button>
+                <button type="button" id="friendsButton" class="btn btn-outline-info col-4">Friends</button>
+            </div>
+            <div class="container mt-4 border-info" id="allConversation" style="overflow-y: scroll;">
             </div>
         </div>
-        <div class="col-sm-8 d-flex flex-column float-right" id="chatPart">
-            <div class="container-fluid row mb-5" th:each="message : ${messageUserMap.keySet()}">
-                <div class="media border p-3 bg-white col-sm-12" th:if="${messageUserMap.get(message).getId() == session.user.id}">
-                    <div class="media-body">
-                        <h4 th:text="${messageUserMap.get(message).getUsername()}"> <small th:text="${message.getCreatedAt()}"></smallth:text></small></h4>
-                        <p th:text="${message.getContent()}"></p>
-                    </div>
-                    <img th:src="@{/images/logo.png}" alt="John Doe" class="ml-3 mt-3 rounded-circle" style="width : 60px;">
-                </div>
-                <div class="media border p-3 bg-white col-sm-12" th:unless="${messageUserMap.get(message).getId() == session.user.id}">
-                    <img th:src="@{/images/logo.png}" alt="John Doe" class="ml-3 mt-3 rounded-circle" style="width : 60px;">
-                    <div class="media-body">
-                        <h4 th:text="${messageUserMap.get(message).getUsername()}"> <small th:text="${message.getCreatedAt()}"></smallth:text></small></h4>
-                        <p th:text="${message.getContent()}"></p>
-                    </div>
-
-                </div>
+        <div class="col-9 mh-100 float-right bg-secondary p-3 align-bottom" id="chatPart" >
+            <div class="h-75 d-flex flex-column" style="overflow-y: scroll;">
+                <div id="messageList" ></div>
             </div>
-            <div class="container-fluid fixed-bottom d-flex flex-inline">
-                <div class="col-sm-4 invisible"><p>1</p></div>
-                <form class="col-sm-8 bg-success" action="#" th:action="@{/message/postNewMessage}" th:object="${newMessage}" method="POST">
-                    <div class="row align-middle">
-                        <input type="text" placeholder="Message ..." class="form-control col-sm-8 m-1" th:field="*{content}">
-                        <input type="file" id="image-input" name="file" accept="image/*" class="form-control col-sm-2 m-1" th:field="*{image}">
-                        <button type="submit" class="btn btn-light btn-outline-success col-sm-1 m-1"> > </button>
-                    </div>
+            <form class="col-12 bg-info mx-auto" action="#" th:object="${newMessage}" method="POST" enctype="multipart/form-data" id="sendMessageForm">
+                <div class="row align-middle">
+                    <input type="text" placeholder="Message ..." class="form-control col-sm-8 m-1" th:field="*{content}" id="content" required>
+                    <input type="file" class="form-control-file col-sm-2 m-1" id="imageData" name="imageData" accept="image/*">
+                    <button type="button" class="btn btn-light btn-outline-success col-sm-1 m-1" id="sendMessageButton"> > </button>
+                    <input type="number" id="recipientId" class="invisible col-0" value="0" th:field="*{recipientId}">
+                    <select name="messageCategory" id="messageCategory" class="invisible" th:field="*{category}">
+                        <option th:each="messageCategory : ${T(isep.algoproject.models.enums.MessageCategory).values()}"
+                                th:value="${messageCategory}" text="messageCategory">
+                        </option>
+                    </select>
+                </div>
 
-                </form>
-            </div>
-
+            </form>
         </div>
+
     </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/webjars/bootstrap/4.6.2/js/bootstrap.min.js"></script>
+<script src="/js/message.js"></script>
 </body>
 </html>

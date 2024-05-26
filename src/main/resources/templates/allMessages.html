@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>All posts</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/common.css"/>
+    <link rel="stylesheet" href="/css/post.css"/>
+</head>
+<body>
+
+<div class="container-fluid row mb-5" th:each="message : ${messageList}">
+    <div class="media border p-3 bg-white col-sm-12" th:if="${message.getSendUser().getId() == session.user.id}">
+        <img th:src="@{/images/logo.png}" alt="Profile Image" class="align-start mr-3 rounded-circle" style="width : 60px;">
+        <div class="media-body">
+            <h4 th:text="${message.getSendUser().getUsername()}"></h4>
+            <h6> <small th:text="${message.getCreatedAt()}"></small></h6>
+            <p th:text="${message.getContent()}"></p>
+            <img th:src="'data:image/png;base64,' + ${message.getImage()}" alt="Message Image">
+        </div>
+    </div>
+    <div class="media border p-3 bg-white col-sm-12" th:unless="${message.getSendUser().getId() == session.user.id}">
+        <img th:src="@{/images/logo.png}" alt="Profile Image" class="align-start mr-3 rounded-circle" style="width : 60px;">
+        <div class="media-body">
+            <h4 th:text="${message.getSendUser().getUsername()}"></h4>
+            <h6 ><small th:text="${message.getCreatedAt()}"></small></h6>
+            <p th:text="${message.getContent()}"></p>
+            <block th:unless="${message.getImage() == null}">
+                <img th:src="'data:image/png;base64,' + ${message.getImage()}" alt="Message Image">
+            </block>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+</body>
+</html>

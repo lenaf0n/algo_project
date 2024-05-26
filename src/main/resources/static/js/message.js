@@ -1,29 +1,171 @@
-function postMessage(inventoryCell, quantity){
-    const divToShow = document.getElementById("sellItemPanel");
-    divToShow.style.visibility = 'visible';
-    const inventoryId = inventoryCell.id
-    console.log("inventory Id = " + inventoryId);
-        $.ajax({
-            type: 'GET',
-            url: '/inventory/' + inventoryId,
-            success: function(response) {
-                console.log(response);
-
-                const item = response;
-
-                console.log('Item = ' + item);
-                console.log("Item Name = " + item.name);
-                console.log("Item Image = " + item.urlImage);
-                console.log("Item Id = " + item.id);
-                console.log("Quantity = " + quantity);
-
-                $('#item-name').text(item.name);
-                $('#item-image').text(item.urlImage);
-                $('#quantity').attr('max', quantity);
-                $('#idItem').attr('value', item.id);
-            },
-            error: function(xhr, status, error) {
-                console.error('Error: ', error);
-            }
+document.addEventListener('DOMContentLoaded', (event) => {
+    const buttons = document.querySelectorAll('#messageTypeSelector .btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            console.log("button : " + button)
+            e.preventDefault();
+            buttons.forEach(button => button.classList.remove('selected'));
+            this.classList.add('selected');
         });
+    });
+});
+
+document.addEventListener('DOMContentLoaded', (event) => {
+    loadGlobalMessage();
+});
+
+function loadGlobalMessage() {
+    $.ajax({
+        url: '/message/global',
+        method: 'GET',
+        success: function(data) {
+            $('#messageList').html(data);
+            $('#allConversation').html("");
+        },
+        error: function() {
+            alert('Error loading the form');
+        }
+    });
 }
+
+function loadGroupMessage(groupId) {
+    $.ajax({
+        url: '/message/group/' + groupId,
+        method: 'GET',
+        success: function(data) {
+            $('#messageList').html(data);
+            $('#recipientId').attr("value", groupId);
+        },
+        error: function() {
+            alert('Error loading the form');
+        }
+    });
+}
+
+function leaveGroup(groupId) {
+    $.ajax({
+        url: '/message/leave-group/' + groupId,
+        method: 'GET',
+        success: function(data) {
+            if($("#recipientId").val() == groupId){
+                $('#messageList').html("");
+            }
+            $('#allConversation').html(data);
+            $('#messageCategory').val("GROUP").change();
+        },
+        error: function() {
+            alert('Error loading the form');
+        }
+    });
+}
+
+function loadPrivateMessage(friendId) {
+    $.ajax({
+        url: '/message/group/' + friendId,
+        method: 'GET',
+        success: function(data) {
+            $('#messageList').html(data);
+            $('#recipientId').attr("value", friendId);
+        },
+        error: function() {
+            alert('Error loading the form');
+        }
+    });
+}
+
+function loadGroupsList() {
+    $.ajax({
+        url: '/message/group',
+        method: 'GET',
+        success: function(data) {
+            $('#messageList').html("");
+            $('#allConversation').html(data);
+            $('#messageCategory').val("GROUP").change();
+        },
+        error: function() {
+            alert('Error loading the form');
+        }
+    });
+}
+
+function loadFriendsList() {
+    $.ajax({
+        url: '/message/friend',
+        method: 'GET',
+        success: function(data) {
+            $('#messageList').html("");
+            $('#allConversation').html(data);
+            $('#messageCategory').val("FRIENDS").change();
+        },
+        error: function() {
+            alert('Error loading the form');
+        }
+    });
+}
+
+function sendMessage() {
+    var content = $('#content').val();
+    var image = $('#imageData').prop("files")[0];
+    var category = $('#messageCategory').val();
+    var recipientId = $('#recipientId').val();
+    var formData = new FormData();
+
+    formData.append("content", content);
+    formData.append("imageData", image);
+    formData.append("category", category);
+    formData.append("recipientId", recipientId);
+
+    console.log("content = " + content);
+    console.log("image = " + image);
+    console.log("category = " + category);
+    console.log("recipientId = " + recipientId);
+
+    console.log("content in formData = " + formData.get("content"));
+    console.log("image in formData = " + formData.get("imageData"));
+    console.log("category in formData = " + formData.get("category"));
+    console.log("recipientId in formData = " + formData.get("recipientId"));
+
+    console.log(formData.values());
+    $.ajax({
+        url: '/message/sendNewMessage',
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            $('#messageList').html(response);
+            $('#content').val("").change();
+            $('#imageData').val("").change();
+        },
+        error: function() {
+            alert('Error loading the form');
+        }
+    });
+}
+
+$(document).ready(function () {
+    $('#globalButton').click(function () {
+        loadGlobalMessage();
+    });
+});
+
+$(document).ready(function () {
+    $('#groupsButton').click(function () {
+        loadGroupsList();
+    });
+});
+
+$(document).ready(function () {
+    $('#friendsButton').click(function () {
+        loadFriendsList();
+    });
+});
+
+$(document).ready(function () {
+    $('#sendMessageButton').click(function (event) {
+        event.preventDefault();
+        sendMessage();
+    });
+});
+
+

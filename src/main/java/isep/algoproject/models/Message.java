@@ -1,5 +1,6 @@
 package isep.algoproject.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import isep.algoproject.models.enums.MessageCategory;
 import jakarta.persistence.*;
 
@@ -8,11 +9,18 @@ import java.time.Instant;
 @Entity
 public class Message implements Serializable {
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
-    private Long id;
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    private long id;
     @Column(nullable = false)
-    private long sendUserId;
+    private Instant createdAt;
+    @Column(nullable = false)
+    private boolean isRead;
+    @ManyToOne
+    @JoinColumn(name = "send_user_id", nullable = false)
+    @JsonBackReference
+    private User sendUser;
     private long recipientId;
+    @Column(columnDefinition = "text")
     private String content;
     @Lob
     @Column(columnDefinition = "MEDIUMBLOB")
@@ -21,10 +29,7 @@ public class Message implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private MessageCategory category;
-    @Column(nullable = false)
-    private Instant createdAt;
-    @Column(nullable = false)
-    private boolean isRead;
+
 
 
     // Getter and Setter
@@ -48,7 +53,7 @@ public class Message implements Serializable {
         return image;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -68,14 +73,6 @@ public class Message implements Serializable {
         this.image = image;
     }
 
-    public long getSendUserId() {
-        return sendUserId;
-    }
-
-    public void setSendUserId(long sendUserId) {
-        this.sendUserId = sendUserId;
-    }
-
     public long getRecipientId() {
         return recipientId;
     }
@@ -90,5 +87,13 @@ public class Message implements Serializable {
 
     public void setRead(boolean read) {
         isRead = read;
+    }
+
+    public User getSendUser() {
+        return sendUser;
+    }
+
+    public void setSendUser(User sendUser) {
+        this.sendUser = sendUser;
     }
 }

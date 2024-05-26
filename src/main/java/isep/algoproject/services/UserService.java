@@ -62,7 +62,7 @@ public class UserService {
 
     public Graph getUserGraph(User user) {
         List<Connection> userConnections = connectionRepository.findByUser1OrUser2AndFriend(user);
-        List<User> users = getDistinctUsersFromConnections(userConnections);
+        List<User> users = findFriendsOfUser(user);
 
         List<User> usersToAdd = new ArrayList<>();
         List<Connection> connectionsForUsers = connectionRepository.findByUser1InOrUser2InAndStatus(users, users, Status.FRIEND);
@@ -85,6 +85,12 @@ public class UserService {
         List<Interest> userInterests = interestRepository.findInterestByLikedByUsersIn(users);
 
         return createGraph(users, new ArrayList<>(userConnectionsSet), userInterests);
+    }
+
+    public List<User> findFriendsOfUser(User user){
+        List<Connection> userConnections = connectionRepository.findByUser1OrUser2AndFriend(user);
+        List<User> users = getDistinctUsersFromConnections(userConnections);
+        return users;
     }
 
 
