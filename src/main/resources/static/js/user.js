@@ -13,7 +13,6 @@ $(document).ready(function(){
     function loadMyPostsContent() {
         const userId = $("#userDiv").attr("data-userId");
         $('#content').css('display', 'block');
-        console.log(userId);
         $.ajax({
             url: '/post/' + userId,
             method: 'GET',
@@ -30,7 +29,6 @@ $(document).ready(function(){
 
     function removeRequest() {
         const userId = $("#userDiv").attr("data-userId");
-        console.log("Removing friend with user ID:", userId);
         $.ajax({
             type: 'DELETE',
             url: '/unlike/' + userId,
@@ -73,7 +71,6 @@ $(document).ready(function(){
     $('#likeFriend').click(function(event){
         event.preventDefault();
         const userId = $("#userDiv").attr("data-userId");
-        console.log("Liking friend with user ID:", userId);
         $.ajax({
             type: 'POST',
             url: '/like/' + userId,

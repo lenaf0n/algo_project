@@ -44,7 +44,6 @@ $(document).ready(function () {
                 },
                 error: function (xhr, status, error) {
                     console.error('Error:', error);
-                    console.log('Response Text:', xhr.responseText); // Log response text
                 }
             });
         } else if (username.replace(/^#/, "").trim() !== '' && username.startsWith('#')) {
@@ -53,7 +52,6 @@ $(document).ready(function () {
                 url: '/interest/' + username.replace(/^#/, ""),
                 success: function (data) {
                     $('#userList').empty();
-                    console.log(data)
                     if (data.length <= 10) {
                         data.forEach(function (searchResultInterest) {
                             let listItem = $('<li>').addClass('list-group-item d-flex justify-content-between align-items-center');
@@ -91,7 +89,6 @@ $(document).ready(function () {
                 },
                 error: function (xhr, status, error) {
                     console.error('Error:', error);
-                    console.log('Response Text:', xhr.responseText); // Log response text
                 }
             });
         }
@@ -104,7 +101,6 @@ $(document).ready(function () {
         // Assuming heartButton is the ID of your button
         $('.heart-button-recommended').click(function () {
             const userId = $(this).data('user-id');
-            console.log(userId)
             if ($(this).hasClass('btn-danger') || $(this).hasClass('btn-warning')) {
                 filledHeartFunction(userId);
             } else {

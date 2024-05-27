@@ -60,7 +60,6 @@ $(document).ready(function() {
 
         // Get the comment content
         const comment = $('#commentContent').val();
-        console.log(comment);
 
         // Construct the AJAX request URL
         const url = '/post/comment/' + encodeURIComponent(comment);

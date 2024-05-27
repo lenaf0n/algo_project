@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
     const buttons = document.querySelectorAll('#messageTypeSelector .btn');
     buttons.forEach(button => {
         button.addEventListener('click', function(e) {
-            console.log("button : " + button)
             e.preventDefault();
             buttons.forEach(button => button.classList.remove('selected'));
             this.classList.add('selected');

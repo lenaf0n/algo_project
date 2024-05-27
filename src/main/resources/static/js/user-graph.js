@@ -19,7 +19,6 @@ async function fetchData() {
 (async () => {
     try {
         let data = await fetchData();
-        console.log(data);
 
         simulation = d3.forceSimulation(data.nodes)
             .force('link', d3.forceLink(data.links).id(d => d.id).distance(function(d) {
@@ -114,11 +113,8 @@ function dragended(event, d) {
 
 
 function handleNodeClick(event, d) {
-    console.log('Node clicked:', d);
-
     if (d.type === 'INTEREST') {
         let cleanedStr = d.id.replace('interest', '');
-        console.log(cleanedStr)
         window.location.href = `/interest-page/${cleanedStr}`
     }
     else if (d.type === 'USER' && d.name !== userNameValue) {

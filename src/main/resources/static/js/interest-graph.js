@@ -18,8 +18,6 @@ async function fetchData() {
 (async () => {
     try {
         let data = await fetchData();
-        console.log(data);
-
         simulation = d3.forceSimulation(data.nodes)
             .force('link', d3.forceLink(data.links).id(d => d.id).distance(function(d) {
                 return Math.random() * (300 - 100) + 100;
@@ -111,12 +109,11 @@ function dragended(event, d) {
 
 
 function handleNodeClick(event, d) {
-    console.log('Node clicked:', d);
     if (d.type === 'USER' && d.name === userNameValue) {
         window.location.href = `/dashboard`;
     }
     else if (d.type === 'USER' && d.name !== userNameValue) {
-        const userId = d.id;
-        window.location.href = `/user-page/${userId}`
+        let cleanedStr = d.id.replace('user', '');
+        window.location.href = `/user-page/${cleanedStr}`
     }
 }
