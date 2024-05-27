@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Privacy Form</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .img-thumbnail:hover {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Display user information -->
+    <div class="card mt-5">
+        <div class="card-header">
+            User Information
+        </div>
+        <div class="card-body row">
+            <div class="col-4">
+                <h5 class="card-title" th:text="${user.name}"></h5>
+                <img th:if="${user.image == null}" src="/images/icons/001-girl.png" class="img-thumbnail">
+                <img th:if="${user.image != null}" th:src="@{'/images/icons/' + ${user.image}}" class="img-thumbnail">
+                <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#exampleModal">
+                    Edit
+                </button>
+            </div>
+            <div class="col-4">
+                <form th:action="@{/updateBio}" method="post">
+                    <p class="card-text">
+                        <strong>Username:</strong> <span th:text="${user.username}"></span><br>
+                        <strong>Email:</strong> <span th:text="${user.email}"></span><br>
+                        <strong>Bio:</strong>
+                        <textarea name="bio" class="form-control" rows="3" th:text="${user.bio}"></textarea>
+                    </p>
+                    <button type="submit" class="btn btn-outline-primary">Update Bio</button>
+                </form>
+
+            </div>
+            <div class="col-4">
+                <h6>Privacy Settings:</h6>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="interestPrivacyInfo" th:checked="${user.interestPrivacy}">
+                    <label class="form-check-label" for="interestPrivacy">Interest Privacy</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="graphPrivacyInfo" th:checked="${user.graphPrivacy}">
+                    <label class="form-check-label" for="graphPrivacy">Graph Privacy</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="postPrivacyInfo" th:checked="${user.postPrivacy}">
+                    <label class="form-check-label" for="postPrivacy">Post Privacy</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Form -->
+    <h2 class="mt-3">Privacy Settings</h2>
+    <form th:action="@{/submitPrivacyForm}" th:object="${privacyForm}" method="post" class="mt-3">
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" th:field="*{interestPrivacy}" id="interestPrivacy">
+            <label class="form-check-label" for="interestPrivacy">Interest Privacy</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" th:field="*{graphPrivacy}" id="graphPrivacy">
+            <label class="form-check-label" for="graphPrivacy">Graph Privacy</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" th:field="*{postPrivacy}" id="postPrivacy">
+            <label class="form-check-label" for="postPrivacy">Post Privacy</label>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Submit</button>
+    </form>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imagePopupLabel">Select Profile Image</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <!-- List of Images from the icons folder -->
+                    <div class="col-4 mb-3" th:each="image : ${images}">
+                        <img th:src="@{'/images/icons/' + ${image}}" class="image-icon img-thumbnail" th:data-image="${image}" onclick="selectImage(this)">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    function selectImage(button) {
+        const image = button.getAttribute('data-image');
+        $('#imagePopup').modal('hide');
+
+        // AJAX call to save the selected image
+        $.ajax({
+            type: 'POST',
+            url: '/saveProfileImage/' + image,
+            contentType: 'application/json',
+            success: function(response) {
+                console.log('Profile image updated successfully');
+                location.reload();
+            },
+            error: function(error) {
+                console.error('Error updating profile image', error);
+            }
+        });
+    }
+</script>
+</body>
+</html>

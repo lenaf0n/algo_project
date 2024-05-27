@@ -11,6 +11,8 @@ import java.util.List;
 public interface ConnectionRepository extends JpaRepository<Connection, Long> {
     Connection findByUser1IdAndUser2Id(Long user1Id, Long user2Id);
 
+    boolean existsByUser1IdAndUser2IdAndStatus(Long user1Id, Long user2Id, Status status);
+
     @Query("SELECT e FROM Connection e WHERE (e.user1 = :user OR e.user2 = :user) AND e.status = 'FRIEND'")
     List<Connection> findByUser1OrUser2AndFriend(User user);
 

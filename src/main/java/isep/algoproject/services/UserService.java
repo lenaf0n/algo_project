@@ -1,10 +1,7 @@
 package isep.algoproject.services;
 
 import isep.algoproject.models.*;
-import isep.algoproject.models.Dtos.Graph;
-import isep.algoproject.models.Dtos.Link;
-import isep.algoproject.models.Dtos.Node;
-import isep.algoproject.models.Dtos.SearchResultUser;
+import isep.algoproject.models.Dtos.*;
 import isep.algoproject.models.enums.NodeType;
 import isep.algoproject.models.enums.Status;
 import isep.algoproject.repositories.ConnectionRepository;
@@ -66,17 +63,23 @@ public class UserService {
 
         List<User> usersToAdd = new ArrayList<>();
         List<Connection> connectionsForUsers = connectionRepository.findByUser1InOrUser2InAndStatus(users, users, Status.FRIEND);
+        List<Connection> connectionsToRemove = new ArrayList<>();
         for (Connection connection : connectionsForUsers) {
             User user1 = connection.getUser1();
             User user2 = connection.getUser2();
 
-            if (!users.contains(user1) && !usersToAdd.contains(user1)) {
+            if (!users.contains(user1) && !usersToAdd.contains(user1) && !user1.isGraphPrivacy()) {
                 usersToAdd.add(user1);
+            } else if (user1.isGraphPrivacy()) {
+                connectionsToRemove.add(connection);
             }
-            if (!users.contains(user2) && !usersToAdd.contains(user2)) {
+            if (!users.contains(user2) && !usersToAdd.contains(user2) && !user2.isGraphPrivacy()) {
                 usersToAdd.add(user2);
+            } else if (user2.isGraphPrivacy()) {
+                connectionsToRemove.add(connection);
             }
         }
+        connectionsForUsers.removeAll(connectionsToRemove);
 
         userConnections.addAll(connectionsForUsers);
         users.addAll(usersToAdd);
@@ -113,25 +116,49 @@ public class UserService {
         return searchResultUsers;
     }
 
-    public Graph getUserInterestGraph(long userId) {
+    public Graph getUserInterestGraph(long userId, User sessionUser) {
         User user = userRepository.findById(userId);
 
-        List<Interest> interests = user.getLikedInterests();
+        boolean connection1 = connectionRepository.existsByUser1IdAndUser2IdAndStatus(userId, sessionUser.getId(), Status.FRIEND);
+        boolean connection2 = connectionRepository.existsByUser1IdAndUser2IdAndStatus(sessionUser.getId(), userId, Status.FRIEND);
 
-        List<Node> nodes = new ArrayList<>();
-        List<Link> links = new ArrayList<>();
+        if (!user.isInterestPrivacy() || connection1 || connection2) {
+            List<Node> nodes = new ArrayList<>();
+            List<Link> links = new ArrayList<>();
 
-        nodes.add(new Node(user.getId().toString(), user.getUsername(), NodeType.USER));
-        nodes.addAll(interests.stream()
-                .map(interest -> new Node(interest.getId().toString()+"interest", interest.getName(), NodeType.INTEREST))
-                .toList());
+            List<Interest> interests = user.getLikedInterests();
 
-        for (Interest interest : interests) {
-            Link link = new Link(user.getId().toString(), interest.getId().toString()+"interest");
-            links.add(link);
+            nodes.add(new Node(user.getId().toString(), user.getUsername(), NodeType.USER));
+            nodes.addAll(interests.stream()
+                    .map(interest -> new Node(interest.getId().toString()+"interest", interest.getName(), NodeType.INTEREST))
+                    .toList());
+
+            for (Interest interest : interests) {
+                Link link = new Link(user.getId().toString(), interest.getId().toString()+"interest");
+                links.add(link);
+            }
+
+            return new Graph(nodes, links);
         }
+        return null;
+    }
 
-        return new Graph(nodes, links);
+    public void saveUserPrivacySettings(User user, PrivacyForm privacyForm) {
+        user.setInterestPrivacy(privacyForm.isInterestPrivacy());
+        user.setGraphPrivacy(privacyForm.isGraphPrivacy());
+        user.setPostPrivacy(privacyForm.isPostPrivacy());
+
+        userRepository.save(user);
+    }
+
+    public void saveProfileImage(User user, String image) {
+        user.setImage(image);
+        userRepository.save(user);
+    }
+
+    public void saveProfileBio(User user, String bio) {
+        user.setBio(bio);
+        userRepository.save(user);
     }
 
     private Status getConnectionStatus(User user1, User user2) {
@@ -172,12 +199,12 @@ public class UserService {
                 .map(interest -> new Node(interest.getId().toString()+"interest", interest.getName(), NodeType.INTEREST))
                 .toList());
 
-        for (User user : users) {
-            for (Interest interest : user.getLikedInterests()) {
-                Link link = new Link(user.getId().toString(), interest.getId().toString()+"interest");
-                links.add(link);
-            }
-        }
+        users.stream()
+                .flatMap(user -> user.getLikedInterests().stream()
+                        .map(interest -> new Link(user.getId().toString(), interest.getId().toString() + "interest")))
+                .forEach(links::add);
+
+
 
         return new Graph(nodes, links);
     }

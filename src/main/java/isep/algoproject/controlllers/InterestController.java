@@ -97,11 +97,15 @@ public class InterestController {
 
     @GetMapping("/interest/graph")
     public ResponseEntity<?> getInterestGraph(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new RedirectView("/login"));
+        }
         Interest interest = (Interest) session.getAttribute("interest");
         if (interest == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new RedirectView("/dashboard"));
         }
-        Graph graph = interestService.getGraphInterest(interest);
+        Graph graph = interestService.getGraphInterest(interest, user);
         return ResponseEntity.ok(graph);
     }
 }

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 public class User implements Serializable {
@@ -37,6 +38,17 @@ public class User implements Serializable {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostComment> comments;
+
+    @Column(nullable = false)
+    private boolean postPrivacy = false;
+
+    @Column(nullable = false)
+    private boolean interestPrivacy = false;
+
+    @Column(nullable = false)
+    private boolean graphPrivacy = false;
+
+    private String image;
 
     public Long getId() {
         return id;
@@ -116,5 +128,37 @@ public class User implements Serializable {
 
     public void setComments(List<PostComment> comments) {
         this.comments = comments;
+    }
+
+    public boolean isPostPrivacy() {
+        return postPrivacy;
+    }
+
+    public void setPostPrivacy(boolean postPrivacy) {
+        this.postPrivacy = postPrivacy;
+    }
+
+    public boolean isInterestPrivacy() {
+        return interestPrivacy;
+    }
+
+    public void setInterestPrivacy(boolean interestPrivacy) {
+        this.interestPrivacy = interestPrivacy;
+    }
+
+    public boolean isGraphPrivacy() {
+        return graphPrivacy;
+    }
+
+    public void setGraphPrivacy(boolean graphPrivacy) {
+        this.graphPrivacy = graphPrivacy;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 }

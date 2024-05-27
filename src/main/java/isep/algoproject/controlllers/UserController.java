@@ -1,23 +1,25 @@
 package isep.algoproject.controlllers;
 
 import isep.algoproject.models.Dtos.Graph;
+import isep.algoproject.models.Dtos.PrivacyForm;
 import isep.algoproject.models.Dtos.SearchResultUser;
 import isep.algoproject.models.User;
 import isep.algoproject.services.ConnectionService;
 import isep.algoproject.services.UserService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
+import java.io.File;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class UserController {
@@ -129,8 +131,65 @@ public class UserController {
     }
 
     @GetMapping("/user/interest-graph/{userId}")
-    public ResponseEntity<?> getUserInterestGraph(@PathVariable long userId) {
-        Graph graph = userService.getUserInterestGraph(userId);
+    public ResponseEntity<?> getUserInterestGraph(@PathVariable long userId, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new RedirectView("/login"));
+        }
+
+        Graph graph = userService.getUserInterestGraph(userId, user);
         return ResponseEntity.ok(graph);
+    }
+
+    @GetMapping("/privacyForm")
+    public String showPrivacyForm(Model model, HttpSession session) {
+        User sessionUser = (User) session.getAttribute("user");
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("user", sessionUser);
+        model.addAttribute("privacyForm", new PrivacyForm());
+
+        File iconsFolder = new File("src/main/resources/static/images/icons");
+        List<String> images = Arrays.stream(iconsFolder.listFiles())
+                .map(File::getName)
+                .collect(Collectors.toList());
+        model.addAttribute("images", images);
+
+        return "privacyForm";
+    }
+
+    @PostMapping("/submitPrivacyForm")
+    public String submitPrivacyForm(@Valid PrivacyForm privacyForm, HttpSession session) {
+        User sessionUser = (User) session.getAttribute("user");
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+
+        userService.saveUserPrivacySettings(sessionUser, privacyForm);
+        return "redirect:/profile";
+    }
+
+    @PostMapping("/saveProfileImage/{image}")
+    public String saveProfileImage(@PathVariable String image, HttpSession session) {
+        User sessionUser = (User) session.getAttribute("user");
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+
+        userService.saveProfileImage(sessionUser, image);
+        return "redirect:/profile";
+    }
+
+    @PostMapping("/updateBio")
+    public String updateBio(@RequestParam("bio") String bio, HttpSession session) {
+        User sessionUser = (User) session.getAttribute("user");
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+
+        userService.saveProfileBio(sessionUser, bio);
+        return "redirect:/profile";
     }
 }

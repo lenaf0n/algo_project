@@ -33,6 +33,9 @@
 
 <div class="container text-center mt-4" th:data-userId="${user.getId()}" id="userDiv">
     <h1 th:text="${user.getUsername()} + ' Page'"></h1>
+    <p th:text="${user.getBio()}"></p>
+    <img th:if="${user.image == null}" src="/images/icons/001-girl.png" class="img-thumbnail">
+    <img th:if="${user.image != null}" th:src="@{'/images/icons/' + ${user.image}}" class="img-thumbnail">
 </div>
 
 <div class="container text-center mt-3 pb-2 border-bottom" id="linkContainer">

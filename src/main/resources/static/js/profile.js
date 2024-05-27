@@ -40,13 +40,29 @@ $(document).ready(function(){
                 $('#content').html(data);
             },
             error: function() {
-                alert('Error loading the form');
+                alert('Error loading the page');
             }
         });
     });
 
     $('#myPostsLink').click(function(event){
         event.preventDefault();
-        loadMyPostsContent(); // Use the function to load "My Posts" content
+        loadMyPostsContent();
     });
+
+    $('#privacySettingsLink').click(function(event){
+        event.preventDefault();
+        $.ajax({
+            url: '/privacyForm',
+            method: 'GET',
+            success: function(data) {
+                $('#content').html(data);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log("Error details:", jqXHR, textStatus, errorThrown);
+                alert('Error loading the page');
+            }
+        });
+    });
+
 });

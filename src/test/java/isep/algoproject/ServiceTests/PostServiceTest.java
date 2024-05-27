@@ -6,8 +6,11 @@ import isep.algoproject.models.Post;
 import isep.algoproject.models.PostComment;
 import isep.algoproject.models.PostLike;
 import isep.algoproject.models.User;
+import isep.algoproject.models.enums.Status;
+import isep.algoproject.repositories.ConnectionRepository;
 import isep.algoproject.repositories.PostCommentRepository;
 import isep.algoproject.repositories.PostRepository;
+import isep.algoproject.repositories.UserRepository;
 import isep.algoproject.services.ImageService;
 import isep.algoproject.services.PostService;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +32,12 @@ import static org.mockito.Mockito.*;
 public class PostServiceTest {
     @Mock
     private PostRepository postRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private ConnectionRepository connectionRepository;
 
     @Mock
     private PostCommentRepository postCommentRepository;
@@ -61,37 +70,85 @@ public class PostServiceTest {
     }
 
     @Test
-    void getUserPostsByUserIdTest() {
-        // Case when posts list is null
+    public void testGetUserPostsByUserId_UserHasNoPrivacyAndNoFriendConnection_ReturnsEmptyList() {
+        // Arrange
+        long userId = 1L;
+        long sessionUserId = 2L;
+
         User user = new User();
-        user.setId(1L);
-        when(postRepository.findPostsByUserId(1L)).thenReturn(null);
+        user.setId(userId);
+        user.setPostPrivacy(true); // User's posts are private
 
-        List<PostIsLiked> result = postService.getUserPostsByUserId(1L, user);
-        assertNotNull(result);
+        User sessionUser = new User();
+        sessionUser.setId(sessionUserId);
+
+        List<Post> posts = new ArrayList<>();
+
+        when(userRepository.findById(userId)).thenReturn(user);
+        when(postRepository.findPostsByUserIdOrderByCreatedAtDesc(userId)).thenReturn(posts);
+        when(connectionRepository.existsByUser1IdAndUser2IdAndStatus(userId, sessionUserId, Status.FRIEND)).thenReturn(false);
+        when(connectionRepository.existsByUser1IdAndUser2IdAndStatus(sessionUserId, userId, Status.FRIEND)).thenReturn(false);
+
+        // Act
+        List<PostIsLiked> result = postService.getUserPostsByUserId(userId, sessionUser);
+
+        // Assert
         assertTrue(result.isEmpty());
+    }
 
-        // Normal case with non-null user and posts
-        User otherUser = new User();
-        otherUser.setId(2L);
+    @Test
+    public void testGetUserPostsByUserId_UserIsFoundButNoPosts_ReturnsEmptyList() {
+        // Arrange
+        long userId = 1L;
+        long sessionUserId = 2L;
 
+        User user = new User();
+        user.setId(userId);
+        user.setPostPrivacy(false); // User's posts are public
+
+        User sessionUser = new User();
+        sessionUser.setId(sessionUserId);
+
+        when(userRepository.findById(userId)).thenReturn(user);
+        when(postRepository.findPostsByUserIdOrderByCreatedAtDesc(userId)).thenReturn(null);
+
+        // Act
+        List<PostIsLiked> result = postService.getUserPostsByUserId(userId, sessionUser);
+
+        // Assert
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testGetUserPostsByUserId_SessionUserIsFriend_ReturnsPostList() {
+        // Arrange
+        long userId = 1L;
+        long sessionUserId = 2L;
+
+        User user = new User();
+        user.setId(userId);
+        user.setPostPrivacy(true);
+        List<Post> posts = new ArrayList<>();
         Post post1 = new Post();
-        post1.setUser(user);
-        Post post2 = new Post();
-        post2.setUser(user);
+        post1.setId(1L);
+        post1.setLikes(new ArrayList<>());
+        posts.add(post1);
 
-        PostLike like = new PostLike();
-        like.setUser(user);
-        post1.setLikes(Collections.singletonList(like));
+        User sessionUser = new User();
+        sessionUser.setId(sessionUserId);
 
-        List<Post> posts = Arrays.asList(post1, post2);
-        when(postRepository.findPostsByUserId(1L)).thenReturn(posts);
+        when(userRepository.findById(userId)).thenReturn(user);
+        when(postRepository.findPostsByUserIdOrderByCreatedAtDesc(userId)).thenReturn(posts);
+        when(connectionRepository.existsByUser1IdAndUser2IdAndStatus(userId, sessionUserId, Status.FRIEND)).thenReturn(true);
+        when(connectionRepository.existsByUser1IdAndUser2IdAndStatus(sessionUserId, userId, Status.FRIEND)).thenReturn(false);
 
-        result = postService.getUserPostsByUserId(1L, user);
+        // Act
+        List<PostIsLiked> result = postService.getUserPostsByUserId(userId, sessionUser);
 
-        assertEquals(2, result.size());
-        assertTrue(result.get(0).isLiked());
-        assertFalse(result.get(1).isLiked());
+        // Assert
+        assertEquals(1, result.size());
+        assertEquals(post1, result.get(0).getPost());
+        assertFalse(result.get(0).isLiked());
     }
 
     @Test
@@ -196,9 +253,13 @@ public class PostServiceTest {
         User user = new User();
         user.setId(1L);
 
+        User postOwner = new User();
+        postOwner.setId(2L);
+
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         Post post = new Post();
+        post.setUser(postOwner);
         PostLike like = new PostLike();
         like.setUser(user);
         List<PostLike> postLikes = new ArrayList<>();
@@ -208,6 +269,9 @@ public class PostServiceTest {
         Page<Post> postPage = new PageImpl<>(Collections.singletonList(post));
 
         when(postRepository.findAll(pageable)).thenReturn(postPage);
+        when(connectionRepository.existsByUser1IdAndUser2IdAndStatus(postOwner.getId(), user.getId(), Status.FRIEND)).thenReturn(false);
+        when(connectionRepository.existsByUser1IdAndUser2IdAndStatus(user.getId(), postOwner.getId(), Status.FRIEND)).thenReturn(false);
+
 
         Page<PostIsLiked> result = postService.getAllPosts(pageable, user);
 

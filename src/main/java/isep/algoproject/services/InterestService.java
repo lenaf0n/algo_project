@@ -6,6 +6,8 @@ import isep.algoproject.models.Dtos.Link;
 import isep.algoproject.models.Dtos.Node;
 import isep.algoproject.models.Dtos.SearchResultInterest;
 import isep.algoproject.models.enums.NodeType;
+import isep.algoproject.models.enums.Status;
+import isep.algoproject.repositories.ConnectionRepository;
 import isep.algoproject.repositories.InterestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,9 @@ import java.util.List;
 public class InterestService {
     @Autowired
     private InterestRepository interestRepository;
+
+    @Autowired
+    private ConnectionRepository connectionRepository;
 
     public boolean createInterest(Interest interest, User user) {
         if (interestRepository.existsByName(interest.getName())) {
@@ -56,13 +61,27 @@ public class InterestService {
         return interestRepository.findById(interestId);
     }
 
-    public Graph getGraphInterest(Interest interest) {
+    public Graph getGraphInterest(Interest interest, User sessionUser) {
         List<Node> nodes = new ArrayList<>();
         List<Link> links = new ArrayList<>();
 
         nodes.add(new Node(interest.getId().toString(), interest.getName(), NodeType.INTEREST));
 
-        for (User user : interest.getLikedByUsers()) {
+        List<User> interestUsers = interest.getLikedByUsers();
+        List<User> userstoRemove = new ArrayList<>();
+        for (User user : interestUsers) {
+            if (user.isGraphPrivacy()) {
+                boolean connection1 = connectionRepository.existsByUser1IdAndUser2IdAndStatus(user.getId(), sessionUser.getId(), Status.FRIEND);
+                boolean connection2 = connectionRepository.existsByUser1IdAndUser2IdAndStatus(sessionUser.getId(), user.getId(), Status.FRIEND);
+
+                if (!connection1 || !connection2) {
+                    userstoRemove.add(user);
+                }
+            }
+        }
+        interestUsers.removeAll(userstoRemove);
+
+        for (User user : interestUsers) {
             nodes.add(new Node(user.getId().toString()+"user", user.getUsername(), NodeType.USER));
             links.add(new Link(user.getId().toString()+"user", interest.getId().toString()));
         }
