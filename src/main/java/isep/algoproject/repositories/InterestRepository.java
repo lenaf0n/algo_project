@@ -13,6 +13,8 @@ public interface InterestRepository extends JpaRepository<Interest, Long> {
 
     List<Interest> findInterestByLikedByUsersIn(List<User> users);
 
+    List<Interest> findInterestByLikedByUsers(User user);
+
     List<Interest> findByNameContaining(String name);
 
     Interest findById(long id);

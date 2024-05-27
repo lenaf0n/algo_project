@@ -24,15 +24,16 @@ $(document).ready(function () {
                             if (searchResultUser.status === 'FRIEND') {
                                 heartButton.addClass('btn-danger').html('<i class="bi bi-heart-fill"></i>');
                             } else if (searchResultUser.status === 'PENDING') {
-                                heartButton.addClass('btn-warning').attr('disabled', true).html('<i class="bi bi-heart"></i>');
+                                heartButton.addClass('btn-warning').html('<i class="bi bi-heart"></i>');
                             } else {
                                 heartButton.addClass('btn-outline-danger').html('<i class="bi bi-heart"></i>');
                             }
 
                             heartButton.click(function () {
-                                if ($(this).hasClass('btn-danger')) {
+                                if ($(this).hasClass('btn-danger') || $(this).hasClass('btn-warning')) {
                                     filledHeartFunction(searchResultUser.user.id);
-                                } else {
+                                }
+                                else {
                                     outlineHeartFunction(searchResultUser.user.id);
                                 }
                             });
@@ -98,6 +99,20 @@ $(document).ready(function () {
             $('#userList').empty();
         }
     });
+
+    $(document).ready(function () {
+        // Assuming heartButton is the ID of your button
+        $('.heart-button-recommended').click(function () {
+            const userId = $(this).data('user-id');
+            console.log(userId)
+            if ($(this).hasClass('btn-danger') || $(this).hasClass('btn-warning')) {
+                filledHeartFunction(userId);
+            } else {
+                outlineHeartFunction(userId);
+            }
+        });
+    });
+
 
     function filledHeartFunction(userId) {
         $.ajax({

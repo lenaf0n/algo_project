@@ -115,4 +115,8 @@ function handleNodeClick(event, d) {
     if (d.type === 'USER' && d.name === userNameValue) {
         window.location.href = `/dashboard`;
     }
+    else if (d.type === 'USER' && d.name !== userNameValue) {
+        const userId = d.id;
+        window.location.href = `/user-page/${userId}`
+    }
 }

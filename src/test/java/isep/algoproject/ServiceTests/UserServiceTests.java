@@ -367,4 +367,44 @@ public class UserServiceTests {
         assertEquals(bio, user.getBio());
         verify(userRepository, times(1)).save(user);
     }
+
+    @Test
+    void testRecommendTop5Friends_NoFriendsNoInterests() {
+        User sessionUser = new User();
+        sessionUser.setId(1L);
+        sessionUser.setUsername("sessionUser");
+
+        when(userRepository.findById(1L)).thenReturn(sessionUser);
+
+        List<SearchResultUser> recommendedUsers = userService.recommendTop5Friends(sessionUser);
+
+        assertNotNull(recommendedUsers);
+        assertTrue(recommendedUsers.isEmpty());
+    }
+
+    @Test
+    void testRecommendTop5Friends_FriendsWithInterests() {
+        User sessionUser = new User();
+        sessionUser.setId(1L);
+        sessionUser.setUsername("sessionUser");
+
+        // Create friends for sessionUser
+        User friend1 = new User();
+        friend1.setId(2L);
+        friend1.setUsername("friend1");
+
+        User friend2 = new User();
+        friend2.setId(3L);
+        friend2.setUsername("friend2");
+
+        when(connectionRepository.findByUser1OrUser2AndFriend(sessionUser)).thenReturn(List.of());
+
+        when(userRepository.findById(1L)).thenReturn(sessionUser);
+
+        List<SearchResultUser> recommendedUsers = userService.recommendTop5Friends(sessionUser);
+
+        assertNotNull(recommendedUsers);
+    }
+
+
 }

@@ -46,7 +46,7 @@ public class UserControllerTest {
     void dashboard_UserNotLoggedIn() {
         when(session.getAttribute("user")).thenReturn(null);
 
-        String viewName = userController.dashboard(session);
+        String viewName = userController.dashboard(session, model);
         assertEquals("redirect:/login", viewName);
     }
 
@@ -55,7 +55,7 @@ public class UserControllerTest {
         User user = new User();
         when(session.getAttribute("user")).thenReturn(user);
 
-        String viewName = userController.dashboard(session);
+        String viewName = userController.dashboard(session, model);
         assertEquals("dashboard", viewName);
     }
 

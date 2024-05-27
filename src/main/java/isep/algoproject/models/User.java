@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Entity
 public class User implements Serializable {
@@ -27,7 +26,7 @@ public class User implements Serializable {
 
     private String bio;
 
-    @ManyToMany(mappedBy = "likedByUsers")
+    @ManyToMany(mappedBy = "likedByUsers", fetch = FetchType.EAGER)
     private List<Interest> likedInterests = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

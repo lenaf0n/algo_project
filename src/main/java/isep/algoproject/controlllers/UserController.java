@@ -30,10 +30,15 @@ public class UserController {
     private ConnectionService connectionService;
 
     @GetMapping("/dashboard")
-    public String dashboard(HttpSession session) {
-        if (!checkLogin(session)) {
+    public String dashboard(HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
             return "redirect:/login";
         }
+
+        List<SearchResultUser> recommendedUsers = userService.recommendTop5Friends(user);
+        model.addAttribute("recommendedUsers", recommendedUsers);
+
         return "dashboard";
     }
 

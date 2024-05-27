@@ -59,6 +59,27 @@
                 <ul id="userList" class="list-group mt-2">
                     <!-- User list items will be populated here -->
                 </ul>
+                <span>Recommended Users</span>
+                <ul id="recommendedUserList" class="list-group mt-2">
+                    <th:block th:if="${recommendedUsers != null and not #lists.isEmpty(recommendedUsers)}">
+                        <div class="list-group">
+                            <!-- Iterate through the recommended users -->
+                            <th:block th:each="searchResultUser : ${recommendedUsers}">
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="col">
+                                        <strong th:text="${searchResultUser.user.name}"></strong>
+                                        <span class="text-muted" th:text="'@' + ${searchResultUser.user.username}"></span>
+                                    </div>
+                                    <button class="heart-button-recommended btn btn-sm"
+                                            th:classappend="${searchResultUser.status == 'FRIEND'} ? 'btn-danger' : (${searchResultUser.status == 'PENDING'} ? 'btn-warning' : 'btn-outline-danger')"
+                                            th:data-user-id="${searchResultUser.getUser().getId()}">
+                                        <i class="bi" th:class="${searchResultUser.status == 'FRIEND'} ? 'bi-heart-fill' : 'bi-heart'"></i>
+                                    </button>
+                                </div>
+                            </th:block>
+                        </div>
+                    </th:block>
+                </ul>
             </div>
         </div>
     </div>

@@ -11,10 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -98,22 +95,8 @@ public class UserService {
 
 
     public List<SearchResultUser> getUsersByUsername(String username, User user) {
-        List<SearchResultUser> searchResultUsers = new ArrayList<>();
         List<User> users = userRepository.findByUsernameContaining(username);
-
-        for (User foundUser : users) {
-            if (!foundUser.equals(user)) {
-                SearchResultUser searchResultUser = new SearchResultUser();
-                searchResultUser.setUser(foundUser);
-
-                Status status = getConnectionStatus(user, foundUser);
-                searchResultUser.setStatus(status.toString());
-
-                searchResultUsers.add(searchResultUser);
-            }
-        }
-
-        return searchResultUsers;
+        return createSearchResultUsers(users, user);
     }
 
     public Graph getUserInterestGraph(long userId, User sessionUser) {
@@ -161,6 +144,49 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public List<SearchResultUser> recommendTop5Friends(User sessionUser) {
+        Set<User> visited = new HashSet<>();
+        Queue<User> queue = new LinkedList<>();
+
+        List<Connection> connections = connectionRepository.findByUser1OrUser2(sessionUser);
+        List<User> friendsOfSessionUser = getDistinctUsersFromConnections(connections);
+        Map<User, Integer> recommendationScores = new HashMap<>();
+
+        queue.add(sessionUser);
+        visited.add(sessionUser);
+
+        while (!queue.isEmpty()) {
+            User currentUser = queue.poll();
+            List<User> friends = getFriends(currentUser);
+
+            for (User friend : friends) {
+                if (!visited.contains(friend)) {
+                    visited.add(friend);
+                    queue.add(friend);
+
+                    if (!friendsOfSessionUser.contains(friend) && !friend.equals(sessionUser)) {
+                        int sharedInterestCount = countSharedInterests(sessionUser, friend);
+                        int mutualFriendCount = countMutualFriends(sessionUser, friend);
+
+                        if (sharedInterestCount > 0 || mutualFriendCount > 0) {
+                            int score = calculateScore(sharedInterestCount, mutualFriendCount);
+                            recommendationScores.put(friend, score);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Sort and get top 5 recommendations
+        List<User> users =  recommendationScores.entrySet().stream()
+                .sorted(Map.Entry.<User, Integer>comparingByValue().reversed())
+                .limit(5)
+                .map(Map.Entry::getKey)
+                .toList();
+
+        return createSearchResultUsers(users, sessionUser);
+    }
+
     private Status getConnectionStatus(User user1, User user2) {
         Connection connection1 = connectionRepository.findByUser1IdAndUser2Id(user1.getId(), user2.getId());
         Connection connection2 = connectionRepository.findByUser1IdAndUser2Id(user2.getId(), user1.getId());
@@ -173,17 +199,6 @@ public class UserService {
         } else {
             return Status.NONE;
         }
-    }
-
-    private static List<User> getDistinctUsersFromConnections(List<Connection> connections) {
-        Set<User> distinctUsers = new HashSet<>();
-
-        for (Connection connection : connections) {
-            distinctUsers.add(connection.getUser1());
-            distinctUsers.add(connection.getUser2());
-        }
-
-        return new ArrayList<>(distinctUsers);
     }
 
     private Graph createGraph(List<User> users, List<Connection> connections, List<Interest> userInterests) {
@@ -207,5 +222,65 @@ public class UserService {
 
 
         return new Graph(nodes, links);
+    }
+
+    private List<User> getFriends(User user) {
+        List<Connection> connections = connectionRepository.findByUser1OrUser2AndFriend(user);
+        return getDistinctUsersFromConnections(connections);
+    }
+
+    private static List<User> getDistinctUsersFromConnections(List<Connection> connections) {
+        Set<User> distinctUsers = new HashSet<>();
+
+        for (Connection connection : connections) {
+            distinctUsers.add(connection.getUser1());
+            distinctUsers.add(connection.getUser2());
+        }
+
+        return new ArrayList<>(distinctUsers);
+    }
+
+    private int countSharedInterests(User user1, User user2) {
+        List<Interest> interests1 = interestRepository.findInterestByLikedByUsers(user1);
+        List<Interest> interests2 = interestRepository.findInterestByLikedByUsers(user2);
+
+        int sharedInterestCount = 0;
+        for (Interest interest : interests1) {
+            if (interests2.contains(interest)) {
+                sharedInterestCount++;
+            }
+        }
+
+        return sharedInterestCount;
+    }
+
+    private int countMutualFriends(User user1, User user2) {
+        List<User> friendsOfUser1 = getFriends(user1);
+        List<User> friendsOfUser2 = getFriends(user2);
+
+        Set<User> mutualFriends = new HashSet<>(friendsOfUser1);
+        mutualFriends.retainAll(friendsOfUser2);
+
+        return mutualFriends.size();
+    }
+
+    private int calculateScore(int sharedInterestCount, int mutualFriendCount) {
+        return (sharedInterestCount * 2) + mutualFriendCount; // Weight shared interests more
+    }
+
+    private List<SearchResultUser> createSearchResultUsers(List<User> users, User user) {
+        List<SearchResultUser> searchResultUsers = new ArrayList<>();
+        for (User foundUser : users) {
+            if (!foundUser.equals(user)) {
+                SearchResultUser searchResultUser = new SearchResultUser();
+                searchResultUser.setUser(foundUser);
+
+                Status status = getConnectionStatus(user, foundUser);
+                searchResultUser.setStatus(status.toString());
+
+                searchResultUsers.add(searchResultUser);
+            }
+        }
+        return searchResultUsers;
     }
 }

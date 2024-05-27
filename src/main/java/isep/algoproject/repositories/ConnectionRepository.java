@@ -16,6 +16,9 @@ public interface ConnectionRepository extends JpaRepository<Connection, Long> {
     @Query("SELECT e FROM Connection e WHERE (e.user1 = :user OR e.user2 = :user) AND e.status = 'FRIEND'")
     List<Connection> findByUser1OrUser2AndFriend(User user);
 
+    @Query("SELECT e FROM Connection e WHERE (e.user1 = :user OR e.user2 = :user)")
+    List<Connection> findByUser1OrUser2(User user);
+
     @Query("SELECT e FROM Connection e WHERE e.user2 = :user AND e.status = 'PENDING'")
     List<Connection> findByUser2AndPendingStatus(User user);
 
