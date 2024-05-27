@@ -59,9 +59,23 @@ function leaveGroup(groupId) {
     });
 }
 
+function addPlayer(groupId) {
+    $.ajax({
+        url: '/message/group-add/' + groupId,
+        method: 'GET',
+        success: function(data) {
+            $('#messageList').html(data);
+            $('#messageCategory').val("GROUP").change();
+        },
+        error: function() {
+            alert('Error loading the form');
+        }
+    });
+}
+
 function loadPrivateMessage(friendId) {
     $.ajax({
-        url: '/message/group/' + friendId,
+        url: '/message/friend/' + friendId,
         method: 'GET',
         success: function(data) {
             $('#messageList').html(data);

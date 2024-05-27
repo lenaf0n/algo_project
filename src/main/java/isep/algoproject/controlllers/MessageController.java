@@ -78,9 +78,7 @@ public class MessageController {
     @GetMapping("/message/global")
     public String showGlobalMessage(Model model,HttpSession session){
         User user = (User) session.getAttribute("user");
-        if(user == null){
-            return "redirect:/login";
-        }
+
         List<Message> messageList = messageService.findByMessageCategory(MessageCategory.GLOBAL);
         model.addAttribute("messageList", messageList);
         return "allMessages";
@@ -89,9 +87,6 @@ public class MessageController {
     @GetMapping("/message/group")
     public String showGroup(Model model, HttpSession session){
         User user = (User) session.getAttribute("user");
-        if(user == null){
-            return "redirect:/login";
-        }
         List<PlayerGroup> playerGroupsList = playerGroupService.findByUserId(user.getId());
         model.addAttribute("playerGroupsList", playerGroupsList);
         model.addAttribute("newGroup", new Group());
@@ -101,20 +96,38 @@ public class MessageController {
     @GetMapping("/message/group/{groupId}")
     public String showGroupMessage(@PathVariable long groupId, Model model, HttpSession session){
         User user = (User) session.getAttribute("user");
-        if(user == null){
-            return "redirect:/login";
-        }
         List<Message> messageList = messageService.findByRecipientIdAndCategory(groupId,MessageCategory.GROUP);
         model.addAttribute("messageList", messageList);
         return "allMessages";
     }
 
+    @GetMapping("/message/group-add/{groupId}")
+    public String showAddUserGroup(@PathVariable long groupId, Model model, HttpSession session){
+        User user = (User) session.getAttribute("user");
+        Group group = groupService.findById(groupId);
+        List<User> friendsList = userService.findFriendsOfUser(user);
+        model.addAttribute("friendsList", friendsList);
+        model.addAttribute("group", group);
+        return "editGroup";
+    }
+
+    @PostMapping("/message/group-add")
+    public String addUserGroup(@RequestParam(name="groupId") long groupId, @RequestParam(name="userId") long userId, Model model, HttpSession session){
+        PlayerGroup playerGroup = new PlayerGroup();
+        User user = userService.findById(userId);
+        Group group = groupService.findById(groupId);
+
+        playerGroup.setUser(user);
+        playerGroup.setGroup(group);
+
+        playerGroupService.save(playerGroup);
+        dashboard(model, session);
+        return "redirect:/message";
+    }
+
     @GetMapping("/message/leave-group/{groupId}")
     public String leaveGroup(@PathVariable long groupId, Model model, HttpSession session){
         User user = (User) session.getAttribute("user");
-        if(user == null){
-            return "redirect:/login";
-        }
 
         PlayerGroup playerLeaveGroup =  playerGroupService.findByUserIdAndGroupId(user.getId(), groupId);
         playerGroupService.delete(playerLeaveGroup);
@@ -129,9 +142,7 @@ public class MessageController {
     @GetMapping("/message/friend")
     public String showFriend(Model model, HttpSession session){
         User user = (User) session.getAttribute("user");
-        if(user == null){
-            return "redirect:/login";
-        }
+
         List<User> friendsList = userService.findFriendsOfUser(user);
         model.addAttribute("friendsList", friendsList);
         return "allFriend";
@@ -140,9 +151,7 @@ public class MessageController {
     @GetMapping("/message/friend/{friendId}")
     public String showFriendMessage(@PathVariable long friendId, Model model, HttpSession session){
         User user = (User) session.getAttribute("user");
-        if(user == null){
-            return "redirect:/login";
-        }
+
         List<Message> messageList = messageService.findByRecipientIdAndCategory(friendId,MessageCategory.FRIENDS);
         model.addAttribute("messageList", messageList);
         return "allMessages";
@@ -151,9 +160,7 @@ public class MessageController {
     @PostMapping("/message/createGroup")
     public String createGroup(@Valid Group newGroup, @RequestParam("imageData") MultipartFile imageData, HttpSession session, Model model) throws FileNotFoundException {
         User user = (User) session.getAttribute("user");
-        if(user == null){
-            return "redirect:/login";
-        }
+
         newGroup.setUser(user);
         groupService.save(newGroup, imageData);
         PlayerGroup newPlayerGroup = new PlayerGroup();

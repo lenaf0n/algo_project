@@ -10,7 +10,7 @@
 <body>
 <div class="container-fluid row mx-auto d-flex flex-column justify-content-center">
     <p th:if="${friendsList.size() == 0}"> You haven't friend</p>
-    <th:block  th:each="friend : ${friendsList}">
+    <th:block  th:each="friend : ${friendsList}" th:unless="${session.user.id == friend.getId()}">
         <div class="media border my-2 p-3 bg-white col-sm-12" th:id="${friend.getId()}" th:onclick="loadPrivateMessage([[${friend.getId()}]])">
             <img th:src="@{/images/logo.png}" alt="Group Image" class="mr-3 rounded-circle" style="width : 60px;">
             <div class="media-body">

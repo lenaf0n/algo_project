@@ -46,5 +46,5 @@ public class GroupService {
         groupRepository.delete(group);
     }
 
-    public List<Group> findById(long id){return groupRepository.findById(id);}
+    public Group findById(long id){return groupRepository.findById(id);}
 }

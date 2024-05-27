@@ -10,5 +10,5 @@ import java.util.List;
 
 @Repository
 public interface GroupRepository extends JpaRepository<Group, Long> {
-    List<Group> findById(long id);
+    Group findById(long id);
 }

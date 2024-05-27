@@ -20,6 +20,7 @@
                 </div>
             </div>
             <button class="close leave-group" th:id="${'delete-' + playerGroup.getGroup().getId()}"  th:onclick="leaveGroup([[${playerGroup.getGroup().getId()}]])">&times;</button>
+            <button class="addPlayer" th:id="${'delete-' + playerGroup.getGroup().getId()}"  th:onclick="addPlayer([[${playerGroup.getGroup().getId()}]])">+</button>
         </div>
     </th:block>
 
