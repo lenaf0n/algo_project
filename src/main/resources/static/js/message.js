@@ -21,6 +21,8 @@ function loadGlobalMessage() {
         success: function(data) {
             $('#messageList').html(data);
             $('#allConversation').html("");
+            $('#recipientId').attr("value", 0);
+            $('#messageCategory').val("GLOBAL").change();
         },
         error: function() {
             alert('Error loading the form');
